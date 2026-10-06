@@ -30,7 +30,7 @@ export function ProfileEditor({ initialProfile, initialPhotoUrl }: { initialProf
           <div className="photo-field">
             {photoUrl && <Image src={photoUrl} alt="Sua foto principal salva" width={160} height={160} unoptimized className="profile-photo" />}
             <label>Foto principal {saved ? "(trocar é opcional)" : "*"}<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" required={!saved} /></label>
-            <p className="muted">JPG, PNG ou WebP, até 5 MB. Removemos os metadados da imagem ao salvar.</p>
+            <p className="muted">JPG, PNG ou WebP, até 3 MB. Removemos os metadados da imagem ao salvar.</p>
           </div>
           <div className="profile-fields">
             <label>Nome *<input name="display_name" autoComplete="nickname" defaultValue={saved?.display_name} required minLength={2} maxLength={80} /></label>

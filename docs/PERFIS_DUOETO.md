@@ -12,7 +12,7 @@ Perfis e fotos só podem ser lidos ou alterados pelo dono autenticado com e-mail
 
 ## Fotos
 
-JPG, PNG e WebP até 5 MB são validados pelo servidor, redimensionados e convertidos para JPG sem metadados. Acesso via URL assinada de uma hora. Arquivos recebem um nome aleatório dentro da pasta da conta. A foto anterior é conservada nesta etapa para evitar perda em edições concorrentes; limpeza de arquivos substituídos fica para uma rotina futura.
+JPG, PNG e WebP até 3 MB são validados pelo servidor, redimensionados e convertidos para JPG sem metadados. O limite deixa margem para o formulário nos requests da Vercel. O bucket tem um limite adicional de 5 MB. Acesso via URL assinada de uma hora. Arquivos recebem um nome aleatório dentro da pasta da conta. A foto anterior é conservada nesta etapa para evitar perda em edições concorrentes; limpeza de arquivos substituídos fica para uma rotina futura.
 
 ## Verificação
 

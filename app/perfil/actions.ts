@@ -19,7 +19,7 @@ export async function saveProfile(previous: ProfileState, form: FormData): Promi
   let uploadedPath = "";
   const photo = form.get("photo");
   if (photo instanceof File && photo.size > 0) {
-    if (photo.size > 5 * 1024 * 1024 || !["image/jpeg", "image/png", "image/webp"].includes(photo.type)) return { success: false, message: "Escolha uma foto JPG, PNG ou WebP de até 5 MB." };
+    if (photo.size > 3 * 1024 * 1024 || !["image/jpeg", "image/png", "image/webp"].includes(photo.type)) return { success: false, message: "Escolha uma foto JPG, PNG ou WebP de até 3 MB." };
     let processed: Buffer;
     try {
       const input = sharp(Buffer.from(await photo.arrayBuffer()), { limitInputPixels: 25000000, animated: false });
