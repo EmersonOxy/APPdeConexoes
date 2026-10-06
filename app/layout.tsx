@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Conexões",
+  title: "Duoeto",
+  applicationName: "Duoeto",
+  icons: { icon: "/brand/icon.png", apple: "/brand/icon.png" },
+  manifest: "/manifest.webmanifest",
   description: "Conheça pessoas com mais contexto e respeito.",
 };
 

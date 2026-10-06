@@ -18,7 +18,7 @@ export default function SignupPage() {
             <ul className="checklist">
               <li>Foto principal</li>
               <li>Nome, idade, cidade e estado</li>
-              <li>Ao menos um objetivo</li>
+              <li>Descrição, interesses e objetivos opcionais</li>
               <li>E-mail confirmado antes de ativar o perfil</li>
             </ul>
           </aside>

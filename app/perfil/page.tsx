@@ -1,35 +1,28 @@
 import { ApplicationShell } from "@/components/application-shell";
+import { ProfileEditor } from "@/components/profile-editor";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { photoBucket, type Profile } from "@/lib/profile";
 import { requireUser } from "@/lib/supabase/require-user";
 import { signOut } from "@/app/auth/actions";
 
 export default async function ProfilePage() {
   const user = await requireUser();
+  const supabase = await createServerSupabaseClient(false);
+  const { data, error } = await supabase.from("duoeto_profiles")
+    .select("display_name,birth_date,city,state,about,interests,objectives,photo_path")
+    .eq("user_id", user.id).maybeSingle();
+  const profile = data as Profile | null;
+  const photo = profile?.photo_path ? await supabase.storage.from(photoBucket).createSignedUrl(profile.photo_path, 3600) : null;
   return (
     <ApplicationShell>
       <main className="page">
         <section className="page-heading">
           <p className="eyebrow">Seu espaço</p>
-          <h1>Perfil e privacidade</h1>
-          <p className="muted">Edite o que outras pessoas veem e acompanhe como a reputação é formada.</p>
-          <p className="muted">Conta confirmada: {user.email}</p>
+          <h1>{profile ? "Seu perfil Duoeto" : "Monte seu perfil"}</h1>
+          <p className="muted">Essencial obrigatório, personalidade opcional. Você decide o que contar.</p>
           <form action={signOut}><button className="button button-secondary" type="submit">Sair da conta</button></form>
         </section>
-        <div className="two-columns">
-          <aside className="accent-panel">
-            <p className="eyebrow">Como outras pessoas veem você</p>
-            <h2>Seu perfil ainda está em configuração.</h2>
-            <p className="muted">
-              Depois de conectado ao Supabase, esta área exibirá suas fotos, objetivos, interesses e reputação.
-            </p>
-          </aside>
-          <section className="panel">
-            <h2>Reputação transparente</h2>
-            <p className="muted">
-              Até 14 primeiras impressões, a reputação fica em formação. Depois da primeira avaliação de interação, o perfil mostra percepção inicial, experiência e nota geral.
-            </p>
-            <p className="notice">Avaliações privadas entram nas médias sem revelar publicamente quem avaliou.</p>
-          </section>
-        </div>
+        {error ? <section className="panel"><h2>Seu perfil estará disponível em breve</h2><p className="muted">Sua conta está confirmada. Estamos preparando o armazenamento dos perfis; tente novamente mais tarde.</p></section> : <ProfileEditor initialProfile={profile} initialPhotoUrl={photo?.data?.signedUrl} />}
       </main>
     </ApplicationShell>
   );

@@ -54,7 +54,7 @@ A opção não pode ser alterada nem a avaliação pode ser apagada pelo autor n
 - O padrão inicial é: 18–50 anos, até 30 km, qualquer gênero, todos os objetivos e sem reputação mínima.
 - “Ainda pensando” é uma opção de objetivo do perfil, não um filtro padrão obrigatório.
 - O filtro de reputação mínima só inclui perfis que já tenham Nota geral. Quem estiver em formação continua aparecendo quando esse filtro não for usado.
-- O filtro de perfil completo considera perfil com dados obrigatórios, foto principal, ao menos uma descrição ou interesse e um objetivo informado.
+- O filtro de perfil completo considera perfil com dados obrigatórios, foto principal, ao menos uma descrição ou interesse e um objetivo informado. Objetivos são opcionais para salvar um perfil; esta exigência se aplica apenas ao filtro de completude.
 - “Passar” não registra exclusão e a pessoa pode retornar.
 - “Não tenho interesse” remove o perfil somente do Feed de quem escolheu essa ação. O usuário pode reverter a escolha na tela de preferências.
 

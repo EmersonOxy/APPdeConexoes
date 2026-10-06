@@ -1,16 +1,14 @@
 import Link from "next/link";
+import { Brand } from "@/components/brand";
 
 export default function HomePage() {
   return (
     <main className="shell">
       <header className="header">
-        <Link className="brand" href="/">
-          <span className="brand-mark">C</span>
-          <span>Conexões</span>
-        </Link>
+        <Brand />
         <div className="button-row">
-          <Link className="button button-secondary" href="/feed">Conhecer o Feed</Link>
-          <Link className="button button-primary" href="/cadastro">Criar perfil</Link>
+          <Link className="button button-secondary" href="/entrar">Entrar</Link>
+          <Link className="button button-primary" href="/cadastro">Criar conta</Link>
         </div>
       </header>
       <section className="landing">
@@ -21,7 +19,7 @@ export default function HomePage() {
             Um espaço para namoro, amizade e novas conexões, onde respeito e experiências reais ajudam a iniciar conversas melhores.
           </p>
           <div className="button-row">
-            <Link className="button button-primary" href="/cadastro">Montar meu perfil</Link>
+            <Link className="button button-primary" href="/cadastro">Criar minha conta</Link>
             <Link className="button button-secondary" href="/feed">Ver prévia do Feed</Link>
           </div>
         </div>

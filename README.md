@@ -8,6 +8,7 @@ MVP web para descobrir pessoas, avaliar a primeira impressão, iniciar um primei
 - [Decisões do MVP](docs/DECISOES_MVP.md)
 - [Arquitetura do MVP](docs/ARQUITETURA_MVP.md)
 - [Autenticação e verificações](docs/AUTENTICACAO.md)
+- [Perfis Duoeto e migração](docs/PERFIS_DUOETO.md)
 
 ## Configuração local
 
