@@ -1,5 +1,7 @@
 # Bíblia do Produto — App de Conexões
 
+As escolhas posteriores para o primeiro corte estão registradas em [Decisões do MVP](DECISOES_MVP.md). Em caso de divergência de escopo, consulte esse documento, que registra as escolhas operacionais feitas na etapa de implementação autorizada pelo responsável pelo projeto.
+
 **Versão:** 0.1  
 **Situação:** base de produto consolidada a partir da conversa de descoberta  
 **Data:** 6 de outubro de 2026
