@@ -1,5 +1,7 @@
 # Bíblia do Produto — App de Conexões
 
+A identidade visual oficial está em [Identidade visual Duoeto](IDENTIDADE_VISUAL.md): Comfortaa 600 na marca, Geist Sans na interface e paleta azul/amarelo/verde pastel aprovada pelo responsável. Essa definição substitui as cores e fontes provisórias da primeira interface.
+
 As escolhas posteriores para o primeiro corte estão registradas em [Decisões do MVP](DECISOES_MVP.md). Em caso de divergência de escopo, consulte esse documento, que registra as escolhas operacionais feitas na etapa de implementação autorizada pelo responsável pelo projeto.
 
 **Versão:** 0.1  

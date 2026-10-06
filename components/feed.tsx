@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { excludeProfile, loadFeed, restoreHiddenProfiles } from "@/app/feed/actions";
 import type { FeedProfile, FeedResult } from "@/lib/feed";
+import { ReputationPanel } from "./reputation";
 
 export function Feed({ initial }: { initial: FeedResult }) {
   const [profiles, setProfiles] = useState(initial.profiles);
@@ -76,7 +77,7 @@ export function Feed({ initial }: { initial: FeedResult }) {
     <aside className="panel">
       <h2>Descoberta</h2>
       <p>Perfis de 18 a 50 anos, em ordem aleatória. Cidade e estado são as únicas informações de localização exibidas.</p>
-      <p className="muted">Filtros adicionais, avaliações e primeiro contato estarão disponíveis em uma próxima etapa.</p>
+      <p className="muted">Avalie sua primeira impressão para liberar o primeiro contato. Filtros adicionais estarão disponíveis em uma próxima etapa.</p>
       <details><summary>Preferências do Feed</summary>
         <p>Reverter “Não tenho interesse” permite que os perfis ocultados voltem em uma próxima visita. Bloqueios são mantidos.</p>
         <button className="button button-secondary" disabled={pending} onClick={() => retry(true)}>Restaurar perfis sem interesse</button>
@@ -96,7 +97,7 @@ function ProfileCard({ profile }: { profile: FeedProfile }) {
       {profile.about ? <p>{profile.about}</p> : null}
       <div className="chips">{profile.interests.map(interest => <span className="chip" key={interest}>{interest}</span>)}</div>
       {profile.objectives.length ? <p>Busca: {profile.objectives.join(", ")}</p> : null}
-      <p className="notice">A reputação ficará visível após sua avaliação de primeira impressão. Avaliações ainda não estão disponíveis.</p>
+      <ReputationPanel target={profile.user_id} />
     </div>
   </article>;
 }

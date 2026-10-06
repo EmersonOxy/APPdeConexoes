@@ -1,8 +1,12 @@
 import { ApplicationShell } from "@/components/application-shell";
 import { requireUser } from "@/lib/supabase/require-user";
+import { connectionAction } from "./actions";
+import { Messages } from "@/components/messages";
+import type { Inbox } from "@/lib/connections";
 
 export default async function MessagesPage() {
-  await requireUser();
+  const user = await requireUser();
+  const result = await connectionAction("list");
   return (
     <ApplicationShell>
       <main className="page">
@@ -11,10 +15,7 @@ export default async function MessagesPage() {
           <h1>Mensagens</h1>
           <p className="muted">Primeiros contatos e conversas aceitas ficam separados.</p>
         </section>
-        <section className="empty">
-          <h2>Suas conversas aparecerão aqui.</h2>
-          <p className="muted">Um primeiro contato vira conversa apenas quando a outra pessoa responde.</p>
-        </section>
+        <Messages userId={user.id} initial={(result.data as Inbox) ?? { contacts: [], conversations: [] }} initialError={result.error} />
       </main>
     </ApplicationShell>
   );

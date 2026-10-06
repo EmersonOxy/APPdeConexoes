@@ -1,0 +1,162 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { PGlite } from "@electric-sql/pglite";
+
+const db = new PGlite();
+const ids = Array.from({ length: 7 }, (_, i) => `${i + 1}`.repeat(8) + "-1111-4111-8111-111111111111");
+const [alice, bob, unconfirmed, banned, incomplete, older, carol] = ids;
+await db.exec(`
+  create role anon; create role authenticated;
+  create schema auth; create schema storage;
+  create table auth.users (id uuid primary key, email_confirmed_at timestamptz, banned_until timestamptz, deleted_at timestamptz);
+  create function auth.uid() returns uuid language sql stable as $$
+    select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid;
+  $$;
+  grant usage on schema public, auth, storage to authenticated, anon;
+  grant execute on function auth.uid() to authenticated, anon;
+  create table storage.buckets (id text primary key, name text, public boolean, file_size_limit bigint, allowed_mime_types text[]);
+  create table storage.objects (bucket_id text, name text, primary key(bucket_id,name));
+  alter table storage.objects enable row level security;
+  grant select, insert, delete on storage.objects to authenticated;
+`);
+await db.exec(await readFile(new URL("../supabase/migrations/20261006010000_duoeto_profiles.sql", import.meta.url), "utf8"));
+await db.exec(await readFile(new URL("../supabase/migrations/20261006175150_duoeto_feed.sql", import.meta.url), "utf8"));
+for (const id of ids) {
+  await db.query("insert into auth.users values ($1, now(), null, null)", [id]);
+  if (id === incomplete) continue;
+  await db.query("insert into storage.objects values ('duoeto-profile-photos',$1),('duoeto-profile-photos',$2)", [id + "/photo.jpg", id + "/old.jpg"]);
+  await db.query(`insert into public.duoeto_profiles (user_id,display_name,birth_date,city,state,photo_path)
+    values ($1,'Pessoa',current_date - make_interval(years => $3),'Cidade','RS',$2)`, [id, id + "/photo.jpg", id === older ? 60 : 25]);
+}
+await db.query("update auth.users set email_confirmed_at=null where id=$1", [unconfirmed]);
+await db.query("update auth.users set banned_until=now()+interval '1 day' where id=$1", [banned]);
+
+async function asUser(id) {
+  await db.exec("reset role");
+  await db.query("select set_config('request.jwt.claim.sub',$1,false)", [id]);
+  await db.exec("set role authenticated");
+}
+async function feed(seen = []) { return (await db.query("select * from public.duoeto_feed($1::uuid[])", [seen])).rows; }
+async function photo(id) { return (await db.query("select public.duoeto_feed_photo($1) as path", [id])).rows[0].path; }
+async function storage(path) { return (await db.query("select name from storage.objects where name=$1", [path])).rows; }
+async function block(owner, target) { await db.query("insert into public.duoeto_blocks(owner_id,target_id) values ($1,$2) on conflict do nothing", [owner, target]); }
+
+
+await db.exec(await readFile(new URL("../supabase/migrations/20261006182732_duoeto_connections.sql", import.meta.url), "utf8"));
+async function rpc(action,target=null,payload={}) {
+  return (await db.query('select public.duoeto_connections($1,$2,$3) as result',[action,target,payload])).rows[0].result;
+}
+await asUser(alice);
+assert.equal((await rpc('reputation',bob)).locked,true);
+assert.equal((await rpc('reputation',bob)).average,undefined);
+await assert.rejects(rpc('send',bob,{body:'Olá'}), /Avalie/);
+await assert.rejects(rpc('rate',alice,{score:4,visibility:'private'}), /outra pessoa/);
+await assert.rejects(rpc('rate',bob,{score:6,visibility:'private'}), /nota/);
+await assert.rejects(rpc('rate',bob,{score:4,visibility:'invalid'}), /privacidade/);
+let reputation=await rpc('rate',bob,{score:4,visibility:'private'});
+assert.equal(reputation.own_score,4);
+assert.equal(reputation.average,4);
+assert.equal(reputation.count,1);
+assert.deepEqual(reputation.reviews,[]);
+assert.equal((await rpc('rate',bob,{score:1,visibility:'profile'})).own_score,4);
+await asUser(carol);
+assert.equal((await rpc('reputation',bob)).locked,true);
+await rpc('rate',bob,{score:2,visibility:'name'});
+await asUser(alice);
+reputation=await rpc('reputation',bob);
+assert.equal(reputation.average,3);
+assert.equal(reputation.reviews.length,1);
+assert.equal(reputation.reviews[0].profile_id,null);
+assert.equal(reputation.reviews[0].author,undefined);
+await asUser(older);
+await rpc('rate',bob,{score:3,visibility:'profile'});
+await asUser(alice);
+assert.ok((await rpc('reputation',bob)).reviews.some(r=>r.profile_id===older));
+await assert.rejects(db.exec('select * from duoeto_private.ratings'),/permission denied/);
+await assert.rejects(db.exec('select * from duoeto_private.contacts'),/permission denied/);
+await assert.rejects(rpc('send',bob,{body:' '}), /1 a 500/);
+await assert.rejects(rpc('send',bob,{body:'x'.repeat(501)}), /1 a 500/);
+let contact=(await rpc('send',bob,{body:'Olá, tudo bem?'})).id;
+await assert.rejects(rpc('send',bob,{body:'Duplicado'}),/pendente/);
+assert.ok(!(await feed()).some(p=>p.user_id===bob));
+let list=await rpc('list');
+assert.equal(list.contacts.length,1);
+assert.equal(list.contacts[0].body,undefined);
+await rpc('edit',contact,{body:'Olá!'});
+assert.equal((await rpc('contact',contact)).body,'Olá!');
+await assert.rejects(rpc('accept',contact), /Somente/);
+await asUser(carol);
+await assert.rejects(rpc('contact',contact),/indisponível/);
+await assert.rejects(rpc('accept',contact),/indisponível/);
+await asUser(bob);
+assert.equal((await rpc('list')).contacts[0].outgoing,false);
+await assert.rejects(rpc('edit',contact,{body:'Intruso'}),/edição/);
+await rpc('rate',alice,{score:5,visibility:'private'});
+await assert.rejects(rpc('send',alice,{body:'Contato reverso'}),/pendente/);
+const conversation=(await rpc('accept',contact)).id;
+assert.equal((await rpc('conversation',conversation)).first_contact,'Olá!');
+await assert.rejects(rpc('accept',contact),/respondido/);
+await assert.rejects(rpc('send',alice,{body:'Duplicado'}),/ativa/);
+await asUser(alice);
+await assert.rejects(rpc('edit',contact,{body:'Depois'}),/respondido/);
+assert.ok(!(await feed()).some(p=>p.user_id===bob));
+await rpc('message',conversation,{body:'Minha mensagem',request_id:'aaaaaaaa-1111-4111-8111-111111111111'});
+await rpc('message',conversation,{body:'Minha mensagem',request_id:'aaaaaaaa-1111-4111-8111-111111111111'});
+assert.equal((await rpc('conversation',conversation)).messages.length,1);
+await asUser(carol);
+await assert.rejects(rpc('conversation',conversation),/indisponível/);
+await assert.rejects(rpc('message',conversation,{body:'Intruso',request_id:'bbbbbbbb-1111-4111-8111-111111111111'}),/indisponível/);
+await asUser(bob);
+await rpc('message',conversation,{body:'Resposta',request_id:'bbbbbbbb-1111-4111-8111-111111111111'});
+assert.equal((await rpc('conversation',conversation)).messages.length,2);
+await rpc('close',conversation);
+await assert.rejects(rpc('message',conversation,{body:'Depois do fim',request_id:'cccccccc-1111-4111-8111-111111111111'}),/encerrada/);
+assert.equal((await rpc('conversation',conversation)).status,'closed');
+
+// Rejection cooldown is directional and measured from decision time.
+await asUser(alice);
+contact=(await rpc('send',bob,{body:'Novo contato'})).id;
+await asUser(bob); await rpc('decline',contact);
+await asUser(alice); await assert.rejects(rpc('send',bob,{body:'Muito cedo'}),/30 dias/);
+await db.exec('reset role');
+await db.query("update duoeto_private.contacts set decided_at=now()-interval '31 days' where id=$1",[contact]);
+await asUser(alice);
+contact=(await rpc('send',bob,{body:'Depois do prazo'})).id;
+await rpc('withdraw',contact);
+assert.equal((await rpc('contact',contact)).body,'');
+contact=(await rpc('send',bob,{body:'Teste prazo de edição'})).id;
+await db.exec('reset role');
+await db.query("update duoeto_private.contacts set created_at=now()-interval '2 hours' where id=$1",[contact]);
+await asUser(alice);
+await assert.rejects(rpc('edit',contact,{body:'Tarde'}),/uma hora/);
+await assert.rejects(rpc('withdraw',contact),/uma hora/);
+await db.exec('reset role');
+await db.query("update duoeto_private.contacts set created_at=now()-interval '31 days' where id=$1",[contact]);
+await asUser(bob); await assert.rejects(rpc('accept',contact),/expirou/);
+await asUser(alice);
+assert.equal((await rpc('list')).contacts.find(c=>c.id===contact).status,'expired');
+const renewed=(await rpc('send',bob,{body:'Após expiração'})).id;
+await asUser(bob); const active=(await rpc('accept',renewed)).id;
+await block(bob,alice);
+assert.equal((await rpc('list')).conversations.length,0);
+await assert.rejects(rpc('conversation',active),/indisponível/);
+await assert.rejects(rpc('message',active,{body:'Bloqueado',request_id:'dddddddd-1111-4111-8111-111111111111'}),/indisponível/);
+await asUser(alice);
+assert.equal((await rpc('list')).conversations.length,0);
+await assert.rejects(rpc('profile',bob),/indisponível/);
+await assert.rejects(rpc('reputation',bob),/indisponível/);
+assert.equal(await photo(bob),null);
+await db.exec('reset role');
+assert.equal((await db.query('select status from duoeto_private.conversations where id=$1',[active])).rows[0].status,'closed');
+
+for (const id of [unconfirmed,banned,incomplete,'']) {
+  await asUser(id);
+  await assert.rejects(rpc('list'),/Complete/);
+  await assert.rejects(rpc('rate',carol,{score:4,visibility:'private'}),/Complete/);
+}
+await db.exec('reset role; set role anon');
+await assert.rejects(rpc('list'),/permission denied/);
+await db.exec('reset role');
+assert.equal((await db.query("select has_function_privilege('anon','public.duoeto_connections(text,uuid,jsonb)','EXECUTE') as allowed")).rows[0].allowed,false);
+await db.close();
+console.log('PASS: avaliações imutáveis, reputação protegida, privacidade, contato único, aceite, recusa, edição/exclusão, prazos, mensagens idempotentes, encerramento, bloqueio bilateral e acesso indevido.');
