@@ -9,15 +9,16 @@ MVP web para descobrir pessoas, avaliar a primeira impressão, iniciar um primei
 - [Arquitetura do MVP](docs/ARQUITETURA_MVP.md)
 - [Autenticação e verificações](docs/AUTENTICACAO.md)
 - [Perfis Duoeto e migração](docs/PERFIS_DUOETO.md)
+- [Feed real e privacidade](docs/FEED_DUOETO.md)
 
 ## Configuração local
 
-1. Instale as dependências com npm install.
+1. Instale as dependências com npm ci.
 2. Copie .env.example para .env.local.
 3. Preencha as duas variáveis públicas do Supabase.
-4. Use npm run build para verificar a base visual.
-5. Inicie a aplicação com npm run dev para explorar a prévia.
+4. Execute npm run test:profiles, npm run test:feed, npm run typecheck e npm run build.
+5. Inicie a aplicação com npm run dev.
 
-O SQL em supabase/drafts é um rascunho para revisão, ainda não deve ser aplicado. Autenticação, cadastro e mensagens reais ainda não estão implementados; as telas são uma prévia identificada como tal.
+O SQL em supabase/drafts é um rascunho para revisão e não deve ser aplicado. Login, confirmação de e-mail, edição e foto do próprio perfil estão implementados. O Feed usa perfis reais após a migração descrita em docs/FEED_DUOETO.md. Avaliações e mensagens persistidas continuam fora desta etapa.
 
 Não envie .env.local nem chaves administrativas do Supabase para o Git.

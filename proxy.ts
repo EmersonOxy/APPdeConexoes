@@ -5,7 +5,7 @@ export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  const protectedPath = ["/perfil", "/mensagens"].some((path) => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(path + "/"));
+  const protectedPath = ["/feed", "/perfil", "/mensagens"].some((path) => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(path + "/"));
   if (!url || !key) {
     if (protectedPath) return NextResponse.redirect(new URL("/entrar?erro=configuracao", request.url));
     return response;
@@ -32,5 +32,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/perfil/:path*", "/mensagens/:path*", "/entrar", "/cadastro"],
+  matcher: ["/feed", "/perfil/:path*", "/mensagens/:path*", "/entrar", "/cadastro"],
 };

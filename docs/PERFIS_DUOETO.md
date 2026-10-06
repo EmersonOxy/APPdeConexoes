@@ -8,7 +8,7 @@ Execute somente supabase/migrations/20261006010000_duoeto_profiles.sql no SQL Ed
 
 A migração foi aplicada no projeto em 6 de outubro de 2026 pelo SQL Editor, com resultado de sucesso. O comando acima serve apenas para novos ambientes; não execute a criação novamente no mesmo banco.
 
-Perfis e fotos só podem ser lidos ou alterados pelo dono autenticado com e-mail confirmado. Esta etapa não libera descoberta pública nem conecta o Feed, que continua sendo prévia. A leitura de outros perfis será desenvolvida com bloqueios e regras de reputação na próxima etapa.
+A tabela de perfis continua acessível diretamente apenas pelo dono autenticado com e-mail confirmado. A etapa seguinte, descrita em [Feed Duoeto](FEED_DUOETO.md), acrescenta uma projeção limitada para descoberta e leitura somente da foto principal atual, com bloqueios bilaterais. Data de nascimento e e-mail não entram nessa projeção.
 
 ## Fotos
 

@@ -20,7 +20,7 @@ export default function HomePage() {
           </p>
           <div className="button-row">
             <Link className="button button-primary" href="/cadastro">Criar minha conta</Link>
-            <Link className="button button-secondary" href="/feed">Ver prévia do Feed</Link>
+            <Link className="button button-secondary" href="/feed">Explorar o Feed</Link>
           </div>
         </div>
         <aside className="hero-card">

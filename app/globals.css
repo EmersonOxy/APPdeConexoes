@@ -423,6 +423,9 @@ h2 {
   content: "✓";
 }
 
+.feed-photo { display: block; width: 100%; max-height: 540px; object-fit: cover; }
+button:disabled { opacity: 0.6; cursor: wait; }
+
 .form {
   display: grid;
   gap: 1rem;
