@@ -6,6 +6,7 @@ const links = [
   { href: "/feed", label: "Feed" },
   { href: "/mensagens", label: "Mensagens" },
   { href: "/perfil", label: "Perfil" },
+  { href: "/notificacoes", label: "Notificações" },
 ];
 
 export function ApplicationShell({ children }: { children: ReactNode }) {

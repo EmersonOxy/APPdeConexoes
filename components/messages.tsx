@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { ReportForm } from "./report-form";
+import { InteractionRating } from "./interaction-rating";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { connectionAction } from "@/app/mensagens/actions";
 import { excludeProfile } from "@/app/feed/actions";
@@ -88,6 +90,7 @@ function ContactCard({ contact, onDone }: { contact: Contact; onDone: (id?: stri
       <button className="button button-secondary" disabled={pending} onClick={() => act("withdraw")}>Excluir primeiro contato</button>
     </div> : null}
     <button className="button button-secondary" disabled={pending} onClick={() => act("block")}>Bloquear perfil</button>
+    <ReportForm subject="contact" target={contact.id} />
     <p role="status" className="notice">{notice}</p>
   </article>;
 }
@@ -164,6 +167,8 @@ function ChatPanel({ conversation, userId, onChanged }: { conversation: Conversa
         <button className="button button-primary" disabled={pending || !body.trim()}>Enviar mensagem</button>
       </form> : <p>Conversa encerrada. Novas mensagens não podem ser enviadas.</p>}
     </> : <p>{notice ? "Conversa indisponível." : "Carregando conversa…"}</p>}
+    <InteractionRating conversationId={conversation.id} revision={Number(chat?.messages.at(-1)?.id ?? 0)} />
+    <ReportForm subject="conversation" target={conversation.id} />
     <p className="notice" role="status">{notice}</p>
   </section>;
 }

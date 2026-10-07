@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { connectionAction } from "@/app/mensagens/actions";
+import { ReportForm } from "./report-form";
 import type { Reputation } from "@/lib/connections";
 
 export function ReputationPanel({ target, onSent, readOnly = false }: { target: string; onSent?: () => void; readOnly?: boolean }) {
@@ -45,10 +46,17 @@ export function ReputationPanel({ target, onSent, readOnly = false }: { target: 
     {reputation?.locked ? <p className="notice">Avalie sua primeira impressão para conhecer a reputação desta pessoa.</p> : reputation ? <div className="reputation-summary">
       <strong>{reputation.count ? `${Number(reputation.average).toFixed(1)} ★` : "Ainda sem avaliações"}</strong>
       {reputation.count ? <p>{reputation.count < 15 ? "Reputação em formação" : "Reputação inicial estabelecida"} · {reputation.count} avaliações</p> : null}
-      <p className="muted">Primeira impressão. A nota geral depende das futuras avaliações de interação.</p>
+      {reputation.overall != null ? <div>
+        <strong>Nota geral: {Number(reputation.overall).toFixed(1)} ★</strong>
+        <p>Percepção inicial: {Number(reputation.perception).toFixed(1)} · Experiência: {Number(reputation.experience).toFixed(1)}</p>
+        <p>Fotos: {Number(reputation.photos).toFixed(1)} · Conversa: {Number(reputation.conversation).toFixed(1)} · Respeito: {Number(reputation.respect).toFixed(1)} · Humor: {Number(reputation.humor).toFixed(1)}</p>
+        <p>{reputation.interaction_count} avaliações de interação{(reputation.interaction_count ?? 0) >= 35 ? " · Histórico consolidado" : ""}</p>
+        <details><summary>Como calculamos</summary><p>Percepção inicial = (primeira impressão + fotos) / 2. Experiência = (conversa + respeito + humor) / 3. Nota geral = (percepção inicial + experiência) / 2. Cada componente usa a média das avaliações válidas, sem pesos ocultos.</p></details>
+      </div> : <p className="muted">A nota geral aparece após a primeira avaliação de interação.</p>}
       {reputation.reviews.length ? <details><summary>Avaliações públicas</summary><ul className="review-list">
-        {reputation.reviews.map((review, index) => <li key={index}>
-          {review.profile_id ? <Link href={`/pessoa/${review.profile_id}`}>{review.name}</Link> : <span>{review.name}</span>} · {review.score} ★
+        {reputation.reviews.map((review) => <li key={review.id}>
+          {review.profile_id ? <Link href={`/pessoa/${review.profile_id}`}>{review.name}</Link> : <span>{review.name}</span>} · {review.kind === "interaction" ? `Interação: fotos ${review.photos}, conversa ${review.conversation}, respeito ${review.respect}, humor ${review.humor}` : `Primeira impressão: ${review.score} ★`}
+          <ReportForm subject={review.kind} target={review.id} />
         </li>)}
       </ul></details> : null}
     </div> : <p>{notice ? "Reputação indisponível." : "Carregando reputação…"}</p>}

@@ -524,3 +524,7 @@ button, summary { touch-action: manipulation; }
 @supports not (backdrop-filter: blur(1px)) { .panel, .profile-card, .empty, .navigation { background: var(--card); } }
 @media (prefers-reduced-transparency: reduce) { .panel, .profile-card, .empty, .navigation { background: var(--card); backdrop-filter: none; } }
 @media (max-width: 600px) { .feed-actions { grid-template-columns: 1fr; } .feed-actions button { min-height: 48px; } }
+
+.notification-list { list-style: none; padding: 0; display: grid; gap: 1rem; }
+.report-form { margin-top: 1rem; }
+.report-form summary { cursor: pointer; }

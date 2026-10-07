@@ -115,14 +115,14 @@ begin
           case when lc.status='pending' and lc.created_at<=now()-interval '30 days' then 'expired' else lc.status end as status,
           lc.created_at, lc.decided_at,
           lc.sender=actor and lc.status='pending' and lc.created_at>now()-interval '1 hour' as editable
-        from duoeto_private.contacts lc join publilc.duoeto_profiles p on p.user_id=case when lc.sender=actor then lc.recipient else lc.sender end
+        from duoeto_private.contacts lc join public.duoeto_profiles p on p.user_id=case when lc.sender=actor then lc.recipient else lc.sender end
         where actor in(lc.sender,lc.recipient) and lc.status in ('pending','declined')
           and duoeto_private.can_connect(p.user_id)
         order by lc.created_at desc limit 100
       ) x),'[]'::jsonb),
       'conversations',coalesce((select jsonb_agg(x order by x.created_at desc) from (
         select lv.id,p.display_name as name,p.user_id as peer_id,lv.status,lv.created_at
-        from duoeto_private.conversations lv join publilc.duoeto_profiles p on p.user_id=case when lv.a=actor then lv.b else lv.a end
+        from duoeto_private.conversations lv join public.duoeto_profiles p on p.user_id=case when lv.a=actor then lv.b else lv.a end
         where actor in(lv.a,lv.b) and duoeto_private.can_connect(p.user_id)
         order by lv.created_at desc limit 100
       ) x),'[]'::jsonb));

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { ApplicationShell } from "@/components/application-shell";
+import { ReportForm } from "@/components/report-form";
 import { ReputationPanel } from "@/components/reputation";
 import { requireUser } from "@/lib/supabase/require-user";
 import { connectionAction } from "@/app/mensagens/actions";
@@ -16,6 +17,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
     <p>{profile.city}, {profile.state}</p><p className="profile-about">{profile.about}</p>
     <div className="chips">{profile.interests.map(interest => <span className="chip" key={interest}>{interest}</span>)}</div>
     <p>{profile.objectives.join(", ")}</p>
+    {id !== user.id ? <ReportForm subject="profile" target={id} /> : null}
     <ReputationPanel key={id} target={id} readOnly={id === user.id} />
   </article></main></ApplicationShell>;
 }

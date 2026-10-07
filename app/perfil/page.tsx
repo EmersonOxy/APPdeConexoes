@@ -1,4 +1,6 @@
 import { ApplicationShell } from "@/components/application-shell";
+import Link from "next/link";
+import { ReputationPanel } from "@/components/reputation";
 import { ProfileEditor } from "@/components/profile-editor";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { photoBucket, type Profile } from "@/lib/profile";
@@ -22,7 +24,9 @@ export default async function ProfilePage() {
           <p className="muted">Essencial obrigatório, personalidade opcional. Você decide o que contar.</p>
           <form action={signOut}><button className="button button-secondary" type="submit">Sair da conta</button></form>
         </section>
-        {error ? <section className="panel"><h2>Seu perfil estará disponível em breve</h2><p className="muted">Sua conta está confirmada. Estamos preparando o armazenamento dos perfis; tente novamente mais tarde.</p></section> : <ProfileEditor initialProfile={profile} initialPhotoUrl={photo?.data?.signedUrl} />}
+        {error ? <section className="panel"><h2>Seu perfil estará disponível em breve</h2><p className="muted">Sua conta está confirmada. Estamos preparando o armazenamento dos perfis; tente novamente mais tarde.</p></section> : <ProfileEditor userId={user.id} initialProfile={profile} initialPhotoUrl={photo?.data?.signedUrl} />}
+      {profile ? <section className="panel"><h2>Sua reputação</h2><ReputationPanel target={user.id} readOnly /></section> : null}
+        <Link href="/denuncias">Acompanhar minhas denúncias</Link>
       </main>
     </ApplicationShell>
   );

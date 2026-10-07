@@ -1,10 +1,11 @@
 "use client";
 import Image from "next/image";
+import { ReputationPanel } from "./reputation";
 import { useActionState, useState } from "react";
 import { saveProfile } from "@/app/perfil/actions";
 import { ageFromBirthDate, interestOptions, objectiveOptions, stateOptions, type Profile, type ProfileState } from "@/lib/profile";
 
-export function ProfileEditor({ initialProfile, initialPhotoUrl }: { initialProfile: Profile | null; initialPhotoUrl?: string }) {
+export function ProfileEditor({ initialProfile, initialPhotoUrl, userId }: { initialProfile: Profile | null; initialPhotoUrl?: string; userId: string }) {
   const [result, action, pending] = useActionState<ProfileState, FormData>(saveProfile, { message: "", success: false });
   const [preview, setPreview] = useState(false);
   const saved = result.profile ?? initialProfile;
@@ -14,6 +15,7 @@ export function ProfileEditor({ initialProfile, initialPhotoUrl }: { initialProf
       <div className="editor-toolbar">
         <button className="button button-secondary" onClick={() => setPreview(!preview)} disabled={!saved || pending} type="button">{preview ? "Editar perfil" : "Pré-visualizar perfil salvo"}</button>
         <span className="muted">A prévia utiliza as informações já salvas.</span>
+        {saved ? <span className="chip">Completude: {Math.round([saved.display_name, saved.birth_date, saved.city, saved.state, saved.photo_path, saved.about.trim(), saved.interests.length > 0, saved.objectives.length > 0].filter(Boolean).length / 8 * 100)}%</span> : null}
       </div>
       {preview && saved ? (
         <article className="panel saved-preview">
@@ -23,7 +25,8 @@ export function ProfileEditor({ initialProfile, initialPhotoUrl }: { initialProf
           <p className="profile-about">{saved.about}</p>
           <div className="chips">{saved.interests.map(value => <span className="chip" key={value}>{value}</span>)}</div>
           {saved.objectives.length > 0 && <p>Procuro: {saved.objectives.join(", ")}</p>}
-          <p className="notice">Ainda sem avaliações. Sua data de nascimento e seu e-mail não aparecem na prévia.</p>
+          <p className="notice">Sua data de nascimento e seu e-mail não aparecem na prévia. Visitantes só veem a reputação depois de avaliar.</p>
+          <ReputationPanel target={userId} readOnly />
         </article>
       ) : (
         <form action={action} className="panel form profile-form">

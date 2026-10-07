@@ -9,7 +9,10 @@
     "typecheck": "tsc --noEmit",
     "test:profiles": "node scripts/test-profile-validation.mjs && node scripts/test-profile-permissions.mjs",
     "test:feed": "node scripts/test-feed-permissions.mjs",
-    "test:connections": "node scripts/test-connections.mjs"
+    "test:connections": "node scripts/test-connections.mjs",
+    "test:interactions": "node scripts/test-interactions.mjs",
+    "test:safety": "node scripts/test-safety.mjs",
+    "test:discovery": "node scripts/test-discovery.mjs"
   },
   "engines": {
     "node": ">=22.0.0"

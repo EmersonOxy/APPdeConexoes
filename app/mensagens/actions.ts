@@ -3,7 +3,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { ConnectionAction } from "@/lib/connections";
 
-const actions = new Set(["list", "profile", "reputation", "rate", "send", "contact", "accept", "decline", "edit", "withdraw", "conversation", "message", "close"]);
+const actions = new Set(["list", "profile", "reputation", "rate", "send", "contact", "accept", "decline", "edit", "withdraw", "conversation", "message", "close", "interaction", "rate_interaction"]);
 export async function connectionAction(action: ConnectionAction, target: string | null = null, payload: Record<string, string | number> = {}) {
   if (!actions.has(action) || (action !== "list" && (typeof target !== "string" || !/^[0-9a-f-]{36}$/i.test(target))) || JSON.stringify(payload).length > 30000) {
     return { data: null, error: "Confira os dados e tente novamente." };
