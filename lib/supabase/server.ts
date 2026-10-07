@@ -12,6 +12,7 @@ export async function createServerSupabaseClient(writable = true) {
   }
 
   return createServerClient(url, anonKey, {
+    cookieOptions: { maxAge: 60 * 60 * 24 * 30, sameSite: "lax" },
     cookies: {
       getAll() {
         return cookieStore.getAll();

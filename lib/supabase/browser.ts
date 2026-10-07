@@ -8,5 +8,5 @@ export function createBrowserSupabaseClient() {
     throw new Error("As variáveis públicas do Supabase ainda não foram configuradas.");
   }
 
-  return createBrowserClient(url, anonKey);
+  return createBrowserClient(url, anonKey, { cookieOptions: { maxAge: 60 * 60 * 24 * 30, sameSite: "lax" } });
 }

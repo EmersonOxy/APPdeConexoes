@@ -2,6 +2,18 @@
 
 Referências de produto: [Bíblia](BIBLIA_DO_PRODUTO.md) e [Decisões do MVP](DECISOES_MVP.md). As decisões posteriores prevalecem sobre propostas antigas. Este documento registra a implementação local e a aplicação validada no Supabase remoto. A implantação na Vercel não foi verificada por esta tarefa.
 
+## Atualização — conta, confirmação e mensagens
+
+Requisitos funcionais aprovados: manter login e entrar no Feed; Conversas como aba inicial; não lidas em ambas as abas/itens; login por usuário; reenvio, código e recuperação de senha; filtros do Feed em página separada e filtros de Mensagens automáticos. Incluídos lista/desbloqueio, paginação por cursor sem teto de 100 e exclusão definitiva de conta conforme decisão explícita do responsável.
+
+Migração `20261007050000_duoeto_accounts_inbox.sql`: usuários privados, resolução de login restrita ao servidor, eventos Realtime próprios por usuário, não lidas com marca de leitura, paginação e funções de conta. Edge Function `duoeto-username-login` publicada e ativa. `20261007051000_duoeto_delete_related_reports.sql` remove também denúncias que apontem para conteúdo excluído mesmo quando denunciante/acusado continuam cadastrados.
+
+Os fluxos autenticados foram exercitados com contas temporárias: confirmação por código, persistência em novo contexto de navegador, login por usuário, upload no Storage, filtros, notificações nas duas abas, leitura, busca automática, recuperação por link sem cookies anteriores, desbloqueio e exclusão das contas e fotos. As contas temporárias são removidas ao final; os seis perfis fictícios solicitados pelo responsável permanecem.
+
+O navegador da nuvem não confia no certificado intermediário para acesso direto ao Supabase; não foi desativada a verificação TLS. A interface usou o fallback periódico, e o Realtime foi confirmado separadamente por assinatura autenticada e recebimento do evento via WebSocket com certificado verificado. Node.js nesta nuvem usa `NODE_USE_ENV_PROXY=1` para acessar o serviço com a configuração de proxy existente.
+
+Para testar: suítes anteriores mais `npm run test:accounts`, `npm run typecheck` e `npm run build`. O teste de conta roda somente em PGlite isolado; não exclui usuários remotos. Consulte [Autenticação](AUTENTICACAO.md) para implantação dos modelos de e-mail e limites do transporte. O SMTP padrão está limitado a 2 e-mails/hora; provedor personalizado ainda é necessário para cadastro geral. Modelos versionados em `supabase/templates/` mantêm o link padrão e acrescentam código e link para outro navegador. A checagem HTTP direta da Vercel foi bloqueada pelo proxy de rede do ambiente (403 no túnel); não confundir push confirmado com implantação web verificada.
+
 ## Atualização final — Feed, álbum e primeira impressão bilateral
 
 - Feed com um perfil por vez, foto em destaque, informações progressivas, gestos verticais para pessoas, laterais para fotos e ↑/↓ no computador. Botão “Passar” removido. Retorno à aba revalida o perfil sem reiniciar os filtros e o histórico.
@@ -58,6 +70,7 @@ npm run test:safety
 npm run test:discovery
 npm run test:feed-gallery
 npm run test:messages
+npm run test:accounts
 npm run typecheck
 npm run build
 npm run start -- --hostname 127.0.0.1
@@ -73,10 +86,10 @@ Sem configuração Supabase, `/`, `/entrar` e `/cadastro` devem responder 200. F
 
 ## Pendências que exigem decisões ou acesso externo
 
-- Aceitação das telas com duas contas confirmadas no navegador, upload real no Storage e verificação da publicação na Vercel. A configuração pública foi carregada localmente de arquivo ignorado; banco remoto e ciclo SQL autenticado já foram validados.
+- Aceitação final no dispositivo do responsável e configuração de SMTP personalizado. Telas autenticadas e upload no Storage foram validados com contas temporárias.
 - Reordenação manual de fotos complementares, política de retenção/limpeza de objetos antigos e moderação de imagens. O álbum de seis fotos, escolha da principal e remoção do álbum já estão implementados.
 - Opções de gênero e significado do filtro, consentimento e precisão da localização aproximada para distância. Não há filtro de distância ou coordenadas inventadas.
 - Critérios, limiares e redação dos badges automáticos e respectivo filtro. Interesses escolhidos já aparecem como chips.
 - Operação de moderação: pessoas responsáveis, painel, acesso administrativo, auditoria das decisões, punição, recurso, invalidação de avaliações, prazos e comunicação. Registro/status de denúncia estão implementados; uma fila não significa que exista equipe operacional.
-- Política de privacidade, consentimentos, retenção e exclusão de dados antes da abertura pública.
-- Ordenação, paginação das listas de contatos/conversas e filtros adicionais de Mensagens continuam sem especificação final. A busca por nome já está implementada. Mídia, push/e-mail, identidade verificada, monetização e aplicativo nativo permanecem fora do primeiro corte.
+- Política de privacidade, consentimentos e retenção operacional antes da abertura pública. A exclusão definitiva da conta e dados associados foi aprovada e implementada.
+- Ordenação por última atividade e filtros adicionais de Mensagens ainda podem evoluir. Paginação por criação/ID, busca por nome e filtro de não lidas estão implementados. Mídia, push/e-mail, identidade verificada, monetização e aplicativo nativo permanecem fora do primeiro corte.

@@ -575,3 +575,5 @@ button, summary { touch-action: manipulation; }
 
 .notification-link { display: grid; place-items: center; min-width: 44px; min-height: 44px; border-radius: 50%; background: white; border: 1px solid var(--line); }
 .header .navigation { margin-left: auto; }
+
+.unread-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.3rem; min-height: 1.3rem; padding: 0 .35rem; margin-left: .25rem; border-radius: 999px; color: white; background: #2859a8; font-size: .75rem; font-weight: 700; }

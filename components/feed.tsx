@@ -2,16 +2,15 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { excludeProfile, loadFeed, restoreHiddenProfiles } from "@/app/feed/actions";
-import { interestOptions, objectiveOptions } from "@/lib/profile";
-import { defaultFeedFilters, type FeedFilters, type FeedProfile, type FeedResult } from "@/lib/feed";
+import Link from "next/link";
+import { defaultFeedFilters, feedQuery, type FeedFilters, type FeedProfile, type FeedResult } from "@/lib/feed";
 import { ProfileGallery } from "./profile-gallery";
 import { ReportForm } from "./report-form";
 import { ReputationPanel } from "./reputation";
 
-export function Feed({ initial }: { initial: FeedResult }) {
+export function Feed({ initial, initialFilters = defaultFeedFilters }: { initial: FeedResult; initialFilters?: FeedFilters }) {
   const [profiles, setProfiles] = useState(initial.profiles);
-  const [filters, setFilters] = useState<FeedFilters>(defaultFeedFilters);
-  const [draftFilters, setDraftFilters] = useState<FeedFilters>(defaultFeedFilters);
+  const filters = initialFilters;
   const [trail, setTrail] = useState<string[]>(initial.profiles[0] ? [initial.profiles[0].user_id] : []);
   const [cursor, setCursor] = useState(0);
   const [seen, setSeen] = useState<string[]>([]);
@@ -79,19 +78,6 @@ export function Feed({ initial }: { initial: FeedResult }) {
       finally { busy.current = false; }
     });
   }
-  function applyFilters() {
-    if (busy.current) return;
-    busy.current = true;
-    startTransition(async () => {
-      try {
-        const result = await loadFeed([], draftFilters);
-        if (result.error) { setNotice(result.error); return; }
-        setFilters(draftFilters); setSeen([]); setProfiles(result.profiles);
-        setTrail(result.profiles[0] ? [result.profiles[0].user_id] : []); setCursor(0); setNotice("");
-      } catch { setNotice("Não foi possível aplicar os filtros."); }
-      finally { busy.current = false; }
-    });
-  }
   function next() { if (cursor < trail.length - 1) revisit(cursor + 1); else advance(); }
 
   const navigation = useRef({ next, previous: () => cursor > 0 && revisit(cursor - 1) });
@@ -132,25 +118,10 @@ export function Feed({ initial }: { initial: FeedResult }) {
       <p role="status" className="notice">{notice}</p>
     </section>
     <aside className="feed-settings">
-      <details className="panel"><summary>Filtros e preferências</summary>
-      <p>Perfis em ordem aleatória. Cidade e estado são as únicas informações de localização exibidas.</p>
-      <p className="muted">Deslize para cima para avançar, para baixo para voltar e para os lados para ver as fotos. No computador, use ↑ e ↓. O histórico guarda até 50 perfis nesta visita e verifica novamente a disponibilidade.</p>
-      <form className="form" onSubmit={event => { event.preventDefault(); applyFilters(); }}>
-        <fieldset disabled={pending}><legend>Filtros do Feed</legend>
-          <label>Idade mínima<input type="number" min={18} max={120} required value={draftFilters.min_age} onChange={event => setDraftFilters(previous => ({ ...previous, min_age: Number(event.target.value) }))} /></label>
-          <label>Idade máxima<input type="number" min={draftFilters.min_age} max={120} required value={draftFilters.max_age} onChange={event => setDraftFilters(previous => ({ ...previous, max_age: Number(event.target.value) }))} /></label>
-          <label>Interesse<select value={draftFilters.interest ?? ""} onChange={event => setDraftFilters(previous => ({ ...previous, interest: event.target.value || undefined }))}><option value="">Qualquer interesse</option>{interestOptions.map(value => <option key={value}>{value}</option>)}</select></label>
-          <label>Objetivo<select value={draftFilters.objective ?? ""} onChange={event => setDraftFilters(previous => ({ ...previous, objective: event.target.value || undefined }))}><option value="">Todos os objetivos</option>{objectiveOptions.map(value => <option key={value}>{value}</option>)}</select></label>
-          <label>Nota geral mínima<select value={draftFilters.min_score ?? ""} onChange={event => setDraftFilters(previous => ({ ...previous, min_score: event.target.value ? Number(event.target.value) : undefined }))}><option value="">Sem reputação mínima</option>{[1,2,3,4,5].map(value => <option value={value} key={value}>{value} ★</option>)}</select></label>
-          <label><input type="checkbox" checked={draftFilters.complete} onChange={event => setDraftFilters(previous => ({ ...previous, complete: event.target.checked }))} /> Somente perfil completo</label>
-          <p className="field-help">Perfil completo inclui descrição ou interesse e objetivo informado. Reputação mínima exige nota geral; sem esse filtro, perfis em formação continuam aparecendo.</p>
-          <button className="button button-primary">Aplicar filtros</button>
-        </fieldset>
-      </form>
+      <Link className="button button-secondary" href={`/feed/filtros?${feedQuery(filters)}`}>Filtros do Feed</Link>
       <details><summary>Preferências do Feed</summary>
         <p>“Não tenho interesse” oculta a pessoa só do seu Feed por 7 dias. Você pode desfazer antes desse prazo. Isso não bloqueia contato nem altera avaliações.</p>
         <button className="button button-secondary" disabled={pending} onClick={() => retry(true)}>Restaurar perfis sem interesse</button>
-      </details>
       </details>
     </aside>
   </div>;

@@ -14,7 +14,8 @@
     "test:safety": "node scripts/test-safety.mjs",
     "test:discovery": "node scripts/test-discovery.mjs",
     "test:feed-gallery": "node scripts/test-feed-gallery.mjs",
-    "test:messages": "node scripts/test-message-history.mjs"
+    "test:messages": "node scripts/test-message-history.mjs",
+    "test:accounts": "node scripts/test-accounts-inbox.mjs && node scripts/test-username-edge.mjs"
   },
   "engines": {
     "node": ">=22.0.0"

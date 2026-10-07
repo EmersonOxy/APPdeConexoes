@@ -356,7 +356,7 @@ Esses itens são a direção desejada, mas o recorte de mídia e os detalhes de 
 
 ### 14.3 Organização
 
-**Decidido.** A área de Mensagens separa primeiro contatos de conversas. A busca por nome foi prevista para essa área.
+**Decidido.** Mensagens abre na aba Conversas e separa primeiros contatos. Busca por nome e filtro de não lidas atualizam sem confirmação manual. As abas e os itens mostram contadores de não lidas, com atualização em tempo real e recuperação periódica. As listas têm paginação. Os filtros do Feed são editados em uma tela separada, com aplicação explícita.
 
 ### 14.4 Em aberto
 
@@ -373,7 +373,7 @@ Esses itens são a direção desejada, mas o recorte de mídia e os detalhes de 
 
 **Decidido.** Bloquear significa que não haverá contato entre as duas pessoas. Quem bloqueou e quem foi bloqueado não devem se encontrar em Feed, busca ou Mensagens.
 
-**Em aberto.** Deve ser definido o tratamento de conversa existente, avaliações pendentes, reversão de bloqueio, eventuais avisos ao bloqueado e prevenção de novos contatos indiretos.
+**Decidido no MVP.** Bloquear encerra conversas ativas sem notificar a pessoa bloqueada. A lista de bloqueados permite desfazer somente o próprio bloqueio, sem reabrir conversas encerradas; o bloqueio da outra pessoa continua valendo. Avaliações e novos contatos seguem as regras em DECISOES_MVP.md. Prevenção de contatos indiretos permanece pendente.
 
 ### 15.2 Denúncia
 
@@ -454,3 +454,7 @@ Qualquer nova funcionalidade deve responder a três perguntas antes de entrar no
 3. Ela está decidida aqui ou precisa ser classificada explicitamente como provisória, em aberto ou futura?
 
 Se a resposta à terceira pergunta for “precisa ser decidida”, ela não deve ser apresentada ao usuário como funcionalidade pronta nem implementada por suposição.
+
+## Atualização de funcionalidades — 7 de outubro de 2026
+
+Conforme confirmação do responsável, a etapa atual prioriza funcionalidades; o acabamento visual fica para depois. Acesso persistente com entrada direta no Feed, login por usuário/e-mail, reenvio de confirmação, código por e-mail, recuperação/troca de senha, desbloqueio e paginação são requisitos atuais. A exclusão de conta é definitiva, incluindo conversas e avaliações associadas, com confirmação explícita na interface. Os detalhes e limites operacionais estão em [Decisões do MVP](DECISOES_MVP.md) e [Autenticação](AUTENTICACAO.md).

@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { inboxAction } from "@/app/mensagens/inbox-actions";
+import { useInboxEvents } from "./use-inbox-events";
 import { ReputationPanel } from "./reputation";
 import { mergeMessages } from "@/lib/message-history";
 import { ReportForm } from "./report-form";
@@ -13,52 +15,69 @@ import type { Chat, Contact, Conversation, Inbox } from "@/lib/connections";
 export function Messages({ initial, initialError, userId }: { initial: Inbox; initialError?: string | null; userId: string }) {
   const [inbox, setInbox] = useState(initial);
   const [notice, setNotice] = useState(initialError ?? "");
-  const [selected, setSelected] = useState<string | null>(null);
-  const [tab, setTab] = useState<"contacts" | "conversations">("contacts");
+  const [conversation, setConversation] = useState<Conversation | null>(null);
+  const [tab, setTab] = useState<"contacts" | "conversations">("conversations");
   const [search, setSearch] = useState("");
-  const searchRef = useRef(search); searchRef.current = search;
+  const [unreadOnly, setUnreadOnly] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const query = useRef({search, unreadOnly}); query.current = {search, unreadOnly};
+  const pages = useRef({contacts: 1, conversations: 1});
   const sequence = useRef(0);
   const refresh = useCallback(async () => {
-    const request = ++sequence.current;
+    const request=++sequence.current; setLoading(true);
     try {
-      const result = await connectionAction("list", null, { search: searchRef.current.trim() });
-      if (request !== sequence.current) return;
-      if (result.error) { setNotice(result.error); setInbox({ contacts: [], conversations: [] }); }
-      else { setInbox(result.data as Inbox); setNotice(""); }
-    } catch { if (request === sequence.current) setNotice("Não foi possível atualizar. Tente novamente."); }
+      const results=await Promise.all((["contacts","conversations"] as const).map(async kind=>{
+        const items: (Contact | Conversation)[]=[];
+        let more=false; let counts={contacts:0,conversations:0}; let cursor: {before_time:string;before_id:string}|undefined;
+        for(let page=0;page<pages.current[kind];page++){
+          const result=await inboxAction("list",{kind,search:query.current.search.trim(),unread_only:query.current.unreadOnly,...cursor});
+          if(result.error)throw new Error(result.error);
+          if(request!==sequence.current)return null;
+          items.push(...result.data.items); more=result.data.has_more;counts=result.data.counts;
+          const last=items.at(-1);if(!more||!last)break;
+          cursor={before_time:last.created_at,before_id:last.id};
+        }
+        return {kind,items,more,counts};
+      }));
+      if(request!==sequence.current||!results[0]||!results[1])return;
+      const next:Inbox={contacts:results[0].items as Contact[],conversations:results[1].items as Conversation[],counts:results[1].counts,has_more:{contacts:results[0].more,conversations:results[1].more}};
+      setInbox(next);setNotice("");return next;
+    } catch {if(request===sequence.current)setNotice("Não foi possível atualizar. Tente novamente.");}
+    finally{if(request===sequence.current)setLoading(false);}
   }, []);
-  useEffect(() => {
-    const update = () => { if (document.visibilityState === "visible") void refresh(); };
-    const timer = setInterval(update, 10000);
-    document.addEventListener("visibilitychange", update);
-    return () => { clearInterval(timer); document.removeEventListener("visibilitychange", update); sequence.current++; };
-  }, [refresh]);
-  useEffect(() => {
-    sequence.current++;
-    const timer = setTimeout(() => void refresh(), 250);
-    return () => clearTimeout(timer);
-  }, [search, refresh]);
-  const conversation = inbox.conversations.find(item => item.id === selected);
+  useInboxEvents(()=>void refresh());
+  useEffect(()=>{
+    const update=()=>{if(document.visibilityState==="visible")void refresh();};
+    const timer=setInterval(update,10000);document.addEventListener("visibilitychange",update);
+    return ()=>{clearInterval(timer);document.removeEventListener("visibilitychange",update);sequence.current++;};
+  },[refresh]);
+  useEffect(()=>{
+    sequence.current++;pages.current={contacts:1,conversations:1};
+    const timer=setTimeout(()=>void refresh(),200);return ()=>clearTimeout(timer);
+  },[search,unreadOnly,refresh]);
+  const badge=(kind:"contacts"|"conversations")=>inbox.counts?.[kind]?<span className="unread-badge">{inbox.counts[kind]}</span>:null;
   return <>
     <div className="button-row" role="group" aria-label="Tipo de mensagens">
-      <button className="button button-secondary" aria-pressed={tab === "contacts"} onClick={() => { setTab("contacts"); setSelected(null); }}>Primeiro contato</button>
-      <button className="button button-secondary" aria-pressed={tab === "conversations"} onClick={() => setTab("conversations")}>Conversas</button>
-      <button className="button button-secondary" onClick={() => void refresh()}>Atualizar</button>
+      <button className="button button-secondary" aria-pressed={tab==="conversations"} onClick={()=>setTab("conversations")}>Conversas {badge("conversations")}</button>
+      <button className="button button-secondary" aria-pressed={tab==="contacts"} onClick={()=>{setTab("contacts");setConversation(null);}}>Primeiros contatos {badge("contacts")}</button>
     </div>
-    <label className="message-search">Buscar por nome<input type="search" value={search} maxLength={80} placeholder="Nome da pessoa" onChange={event => { sequence.current++; setSearch(event.target.value); }} /></label>
+    <label className="message-search">Buscar por nome<input type="search" value={search} maxLength={80} placeholder="Nome da pessoa" onChange={event=>{sequence.current++;setSearch(event.target.value);}} /></label>
+    <label><input type="checkbox" checked={unreadOnly} onChange={event=>{sequence.current++;setUnreadOnly(event.target.checked);}}/> Somente não lidas</label>
+    {loading?<p role="status">Atualizando mensagens…</p>:null}
     <p role="status" className="notice">{notice}</p>
-    {tab === "contacts" ? <section className="inbox-list" aria-label="Primeiros contatos">
-      {inbox.contacts.length ? inbox.contacts.map(contact => <ContactCard key={contact.id} contact={contact} onDone={async id => {
-        await refresh(); if (id) { setSelected(id); setTab("conversations"); }
-      }} />) : <div className="empty"><h2>{search ? "Nenhum contato com esse nome" : "Nenhum primeiro contato"}</h2><p>Você pode enviar um após avaliar alguém no Feed.</p><Link href="/feed">Explorar o Feed</Link></div>}
-    </section> : <div className="messages-layout">
+    {tab==="contacts"?<section className="inbox-list" aria-label="Primeiros contatos">
+      {inbox.contacts.length?inbox.contacts.map(contact=><ContactCard key={contact.id} contact={contact} onDone={async id=>{
+        const next=await refresh();if(id){setConversation(next?.conversations.find(item=>item.id===id)??{id,name:contact.name,peer_id:contact.peer_id,status:"active",created_at:new Date().toISOString()});setTab("conversations");}
+      }}/>):<div className="empty"><h2>Nenhum primeiro contato com esses filtros</h2><Link href="/feed">Explorar o Feed</Link></div>}
+    </section>:<div className="messages-layout">
       <nav className="panel conversation-list" aria-label="Suas conversas">
-        {inbox.conversations.length ? inbox.conversations.map(item => <button className="conversation-choice" aria-pressed={selected === item.id} key={item.id} onClick={() => setSelected(item.id)}>
-          <strong>{item.name}</strong><span>{item.status === "closed" ? "Encerrada" : "Conversa"}</span>
-        </button>) : <p>{search ? "Nenhuma conversa com esse nome." : "Quando alguém aceitar um contato, a conversa aparecerá aqui."}</p>}
+        {inbox.conversations.length?inbox.conversations.map(item=><button className="conversation-choice" aria-pressed={conversation?.id===item.id} key={item.id} onClick={()=>setConversation(item)}>
+          <strong>{item.name} {item.unread?<span className="unread-badge" aria-label={`${item.unread} não lidas`}>{item.unread}</span>:null}</strong><span>{item.status==="closed"?"Encerrada":"Conversa"}</span>
+        </button>):<p>Nenhuma conversa com esses filtros.</p>}
       </nav>
-      {conversation ? <ChatPanel key={conversation.id} conversation={conversation} userId={userId} onChanged={refresh} /> : <section className="empty"><h2>Suas conversas</h2><p>Selecione uma conversa para ler e responder.</p></section>}
+      {conversation?<ChatPanel key={conversation.id} conversation={conversation} userId={userId} onChanged={async()=>{await refresh();}}/>:<section className="empty"><h2>Suas conversas</h2><p>Selecione uma conversa para ler e responder.</p></section>}
     </div>}
+    {inbox.has_more?.[tab]?<button className="button button-secondary" disabled={loading} onClick={()=>{pages.current[tab]++;void refresh();}}>Carregar mais {tab==="contacts"?"contatos":"conversas"}</button>:null}
   </>;
 }
 
@@ -77,7 +96,8 @@ function ContactCard({ contact, onDone }: { contact: Contact; onDone: (id?: stri
         }
         const result = await connectionAction(action, contact.id, action === "edit" ? { body: draft } : {});
         if (result.error) { setNotice(result.error); return; }
-        if (action === "contact") { setBody(result.data.body); setDraft(result.data.body); }
+        if (["contact","accept","decline"].includes(action) && contact.read_cursor) await inboxAction("read",{kind:"contacts",target:contact.id,through:contact.read_cursor});
+        if (action === "contact") { setBody(result.data.body); setDraft(result.data.body); await onDone(); }
         else { setNotice(action === "edit" ? "Mensagem atualizada." : ""); setBody(null); await onDone(action === "accept" ? result.data.id : undefined); }
       } catch { setNotice("Não foi possível concluir. Atualize para conferir o estado do contato."); }
     });
@@ -85,7 +105,8 @@ function ContactCard({ contact, onDone }: { contact: Contact; onDone: (id?: stri
   const labels: Record<string, string> = { pending: "Aguardando resposta", declined: "Recusado", expired: "Expirado" };
   return <article className="panel" aria-busy={pending}>
     <p className="eyebrow">{contact.outgoing ? "Enviado" : "Recebido"} · {labels[contact.status] ?? contact.status}</p>
-    <h2 className="person-name"><Link href={`/pessoa/${contact.peer_id}`}>{contact.name}</Link></h2>
+    <h2 className="person-name"><Link href={`/pessoa/${contact.peer_id}`}>{contact.name}</Link> {contact.unread ? <span className="unread-badge" aria-label={`${contact.unread} não lidas`}>{contact.unread}</span> : null}</h2>
+    {contact.unread && contact.read_cursor ? <button className="button button-secondary" disabled={pending} onClick={()=>startTransition(async()=>{const result=await inboxAction("read",{kind:"contacts",target:contact.id,through:contact.read_cursor!});if(result.error)setNotice(result.error);else await onDone();})}>Marcar como lido</button> : null}
     {body === null ? <button className="button button-secondary" disabled={pending} onClick={() => act("contact")}>Ler mensagem</button> : <p className="message-text">{body}</p>}
     {!contact.outgoing && contact.status === "pending" ? <details><summary>Avaliar a primeira impressão antes de aceitar</summary>
       <p>Conheça o perfil e registre sua avaliação para iniciar a conversa.</p>
@@ -129,9 +150,11 @@ function ChatPanel({ conversation, userId, onChanged }: { conversation: Conversa
         setChat(previous => ({ ...result.data as Chat, messages: mergeMessages(previous?.messages ?? [], result.data.messages) }));
         if (!messagesRef.current) setHasOlder(result.data.messages.length === 50);
         setNotice("");
+        if (document.visibilityState === "visible" && result.data.read_cursor) await inboxAction("read",{kind:"conversations",target:conversation.id,through:result.data.read_cursor});
       }
     } catch { if (request === sequence.current) { setNotice("Não foi possível atualizar a conversa. Tentaremos novamente."); } }
   }, [conversation.id]);
+  useInboxEvents(()=>void refresh());
   useEffect(() => {
     void refresh();
     const update = () => { if (document.visibilityState === "visible") void refresh(); };

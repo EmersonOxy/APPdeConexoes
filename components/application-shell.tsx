@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { UnreadBadge } from "./unread-badge";
 import { Brand } from "./brand";
 
 const links = [
@@ -16,7 +17,7 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
         <nav aria-label="Navegação principal" className="navigation">
           {links.map((link) => (
             <Link href={link.href} key={link.href}>
-              {link.label}
+              {link.label}{link.href === "/mensagens" ? <UnreadBadge /> : null}
             </Link>
           ))}
         </nav>

@@ -27,6 +27,7 @@ export default async function ProfilePage() {
         </section>
         {error ? <section className="panel"><h2>Seu perfil estará disponível em breve</h2><p className="muted">Sua conta está confirmada. Estamos preparando o armazenamento dos perfis; tente novamente mais tarde.</p></section> : <ProfileEditor userId={user.id} initialProfile={profile} initialPhotoUrl={photo?.data?.signedUrl} initialGalleryUrls={galleryPhotos?.data?.map(photo => photo.signedUrl ?? "")} />}
       {profile ? <section className="panel"><h2>Sua reputação</h2><ReputationPanel target={user.id} readOnly /></section> : null}
+        <div className="button-row"><Link href="/conta">Minha conta e segurança</Link><Link href="/bloqueados">Pessoas bloqueadas</Link></div>
         <Link href="/denuncias">Acompanhar minhas denúncias</Link>
       </main>
     </ApplicationShell>

@@ -5,7 +5,7 @@ export const db = new PGlite();
 const ids = Array.from({ length: 7 }, (_, i) => `${i + 1}`.repeat(8) + "-1111-4111-8111-111111111111");
 export const [alice, bob, unconfirmed, banned, incomplete, older, carol] = ids;
 await db.exec(`
-  create role anon; create role authenticated;
+  create role service_role; create role anon; create role authenticated;
   create schema auth; create schema storage;
   create table auth.users (id uuid primary key, email_confirmed_at timestamptz, banned_until timestamptz, deleted_at timestamptz);
   create function auth.uid() returns uuid language sql stable as $$
@@ -62,3 +62,7 @@ export async function safety(action,target=null,payload={}) {
 await db.exec(await readFile(new URL("../supabase/migrations/20261007030000_duoeto_discovery_filters.sql", import.meta.url), "utf8"));
 
 await db.exec(await readFile(new URL("../supabase/migrations/20261007040000_duoeto_feed_gallery_prerequisites.sql", import.meta.url), "utf8"));
+await db.exec("alter table auth.users add column email text; alter table auth.users add column raw_user_meta_data jsonb default '{}';");
+await db.exec(await readFile(new URL("../supabase/migrations/20261007050000_duoeto_accounts_inbox.sql", import.meta.url), "utf8"));
+
+await db.exec(await readFile(new URL("../supabase/migrations/20261007051000_duoeto_delete_related_reports.sql", import.meta.url), "utf8"));
