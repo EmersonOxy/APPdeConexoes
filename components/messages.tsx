@@ -61,7 +61,7 @@ export function Messages({ initial, initialError, userId }: { initial: Inbox; in
       <button className="button button-secondary" aria-pressed={tab==="conversations"} onClick={()=>setTab("conversations")}>Conversas {badge("conversations")}</button>
       <button className="button button-secondary" aria-pressed={tab==="contacts"} onClick={()=>{setTab("contacts");setConversation(null);}}>Primeiros contatos {badge("contacts")}</button>
     </div>
-    <label className="message-search">Buscar por nome<input type="search" value={search} maxLength={80} placeholder="Nome da pessoa" onChange={event=>{sequence.current++;setSearch(event.target.value);}} /></label>
+    <label className="message-search">Buscar por nome ou usuário<input type="search" value={search} maxLength={80} placeholder="Nome ou @usuário" onChange={event=>{sequence.current++;setSearch(event.target.value);}} /></label>
     <label><input type="checkbox" checked={unreadOnly} onChange={event=>{sequence.current++;setUnreadOnly(event.target.checked);}}/> Somente não lidas</label>
     {loading?<p role="status">Atualizando mensagens…</p>:null}
     <p role="status" className="notice">{notice}</p>

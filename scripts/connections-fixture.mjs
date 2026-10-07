@@ -66,3 +66,5 @@ await db.exec("alter table auth.users add column email text; alter table auth.us
 await db.exec(await readFile(new URL("../supabase/migrations/20261007050000_duoeto_accounts_inbox.sql", import.meta.url), "utf8"));
 
 await db.exec(await readFile(new URL("../supabase/migrations/20261007051000_duoeto_delete_related_reports.sql", import.meta.url), "utf8"));
+
+await db.exec(await readFile(new URL("../supabase/migrations/20261007052000_duoeto_inbox_username_search.sql", import.meta.url), "utf8"));

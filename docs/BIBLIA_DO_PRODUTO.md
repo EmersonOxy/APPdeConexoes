@@ -457,4 +457,6 @@ Se a resposta à terceira pergunta for “precisa ser decidida”, ela não deve
 
 ## Atualização de funcionalidades — 7 de outubro de 2026
 
-Conforme confirmação do responsável, a etapa atual prioriza funcionalidades; o acabamento visual fica para depois. Acesso persistente com entrada direta no Feed, login por usuário/e-mail, reenvio de confirmação, código por e-mail, recuperação/troca de senha, desbloqueio e paginação são requisitos atuais. A exclusão de conta é definitiva, incluindo conversas e avaliações associadas, com confirmação explícita na interface. Os detalhes e limites operacionais estão em [Decisões do MVP](DECISOES_MVP.md) e [Autenticação](AUTENTICACAO.md).
+Conforme confirmação do responsável, a etapa atual prioriza funcionalidades; o acabamento visual fica para depois. Acesso persistente com entrada direta no Feed, login por usuário/e-mail, reenvio de confirmação por link, recuperação/troca de senha, desbloqueio e paginação são requisitos atuais. A exclusão de conta é definitiva, incluindo conversas e avaliações associadas, com confirmação explícita na interface. Os detalhes e limites operacionais estão em [Decisões do MVP](DECISOES_MVP.md) e [Autenticação](AUTENTICACAO.md).
+
+A busca nas conversas e primeiros contatos aceita também nome de usuário, com ou sem `@`. Os e-mails atuais confirmam por link; código numérico depende de modelo personalizado e não é solicitado na interface.

@@ -19,6 +19,8 @@ const contact=(await rpc('send',bob,{body:'Olá'})).id;
 await asUser(bob);
 assert.equal((await inbox('counts')).contacts,1);
 let page=await inbox('list',{kind:'contacts'});assert.equal(page.items[0].unread,1);
+assert.equal((await inbox('list',{kind:'contacts',search:' @ALICE_123 '})).items[0].id,contact);
+assert.equal((await inbox('list',{kind:'contacts',search:'bob_test'})).items.length,0);
 await inbox('read',{kind:'contacts',target:contact,through:page.items[0].read_cursor});
 assert.equal((await inbox('counts')).contacts,0);
 await rpc('rate',alice,{score:5,visibility:'private'});const chat=(await rpc('accept',contact)).id;
@@ -28,6 +30,11 @@ for(let i=0;i<55;i++)await rpc('message',chat,{body:'Mensagem '+i,request_id:ran
 await asUser(bob);assert.equal((await inbox('counts')).conversations,55);
 const latest=await rpc('conversation',chat);assert.ok(latest.read_cursor);
 assert.equal((await inbox('list',{kind:'conversations',unread_only:true})).items[0].unread,55);
+assert.equal((await inbox('list',{kind:'conversations',search:'@ALICE_123',unread_only:true})).items[0].id,chat);
+assert.equal((await inbox('list',{kind:'conversations',search:'ice_12'})).items[0].id,chat);
+assert.equal((await inbox('list',{kind:'conversations',search:'Pessoa'})).items[0].id,chat);
+assert.equal((await inbox('list',{kind:'conversations',search:'bob_test'})).items.length,0);
+await asUser(carol);assert.equal((await inbox('list',{kind:'conversations',search:'alice_123'})).items.length,0);await asUser(bob);
 // Watermark acknowledges only the read snapshot, not a later arriving message.
 await asUser(alice);await rpc('message',chat,{body:'Nova depois da leitura',request_id:randomUUID()});
 await asUser(bob);await inbox('read',{kind:'conversations',target:chat,through:latest.read_cursor});
@@ -39,6 +46,7 @@ for(let i=0;i<5;i++)await rpc('message',chat,{body:'Resposta',request_id:randomU
 await rpc('rate_interaction',chat,{photos:4,conversation:4,respect:4,humor:4,visibility:'private'});
 await block(bob,alice);assert.equal((await account('blocks')).length,1);
 assert.equal((await inbox('counts')).conversations,0);
+assert.equal((await inbox('list',{kind:'conversations',search:'alice_123'})).items.length,0);
 await account('unblock',{target:alice});assert.equal((await account('blocks')).length,0);
 assert.equal((await rpc('conversation',chat)).status,'closed');
 await asUser(alice);await block(alice,bob);

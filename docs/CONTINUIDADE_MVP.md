@@ -1,10 +1,18 @@
+# Revisão complementar — autenticação e busca
+
+- Aplicada a migração `20261007052000_duoeto_inbox_username_search.sql`: busca em conversas e primeiros contatos aceita nome ou usuário, com/sem `@`, preservando privacidade, bloqueios, não lidas e paginação.
+- Concluído `/auth/finish`, que estava sem commit: links padrão de confirmação/recuperação iniciam sessão mesmo em outro navegador. Supabase atualizado para autorizar os callbacks de produção e localhost:3000.
+- Removida a solicitação de código numérico da interface: os e-mails reais atuais só incluem link. Modelos com código não foram aplicados porque o provedor recusou a personalização sem SMTP próprio/upgrade.
+- Envio de e-mails **não está concluído para cadastro geral**: SMTP próprio ainda precisa ser configurado; transporte padrão tem limite de 2 envios/hora. Testes administrativos de links não comprovam entrega de e-mails.
+- Restante do lote anterior está no commit `c465834`; banco e Edge Function foram aplicados. Deploy Vercel não foi confirmado por esta nuvem (restrição do proxy).
+
 # Continuidade do MVP — 7 de outubro de 2026
 
 Referências de produto: [Bíblia](BIBLIA_DO_PRODUTO.md) e [Decisões do MVP](DECISOES_MVP.md). As decisões posteriores prevalecem sobre propostas antigas. Este documento registra a implementação local e a aplicação validada no Supabase remoto. A implantação na Vercel não foi verificada por esta tarefa.
 
 ## Atualização — conta, confirmação e mensagens
 
-Requisitos funcionais aprovados: manter login e entrar no Feed; Conversas como aba inicial; não lidas em ambas as abas/itens; login por usuário; reenvio, código e recuperação de senha; filtros do Feed em página separada e filtros de Mensagens automáticos. Incluídos lista/desbloqueio, paginação por cursor sem teto de 100 e exclusão definitiva de conta conforme decisão explícita do responsável.
+Requisitos funcionais aprovados: manter login e entrar no Feed; Conversas como aba inicial; não lidas em ambas as abas/itens; login por usuário; reenvio de link e recuperação de senha; filtros do Feed em página separada e filtros de Mensagens automáticos. Incluídos lista/desbloqueio, paginação por cursor sem teto de 100 e exclusão definitiva de conta conforme decisão explícita do responsável.
 
 Migração `20261007050000_duoeto_accounts_inbox.sql`: usuários privados, resolução de login restrita ao servidor, eventos Realtime próprios por usuário, não lidas com marca de leitura, paginação e funções de conta. Edge Function `duoeto-username-login` publicada e ativa. `20261007051000_duoeto_delete_related_reports.sql` remove também denúncias que apontem para conteúdo excluído mesmo quando denunciante/acusado continuam cadastrados.
 
@@ -12,7 +20,7 @@ Os fluxos autenticados foram exercitados com contas temporárias: confirmação 
 
 O navegador da nuvem não confia no certificado intermediário para acesso direto ao Supabase; não foi desativada a verificação TLS. A interface usou o fallback periódico, e o Realtime foi confirmado separadamente por assinatura autenticada e recebimento do evento via WebSocket com certificado verificado. Node.js nesta nuvem usa `NODE_USE_ENV_PROXY=1` para acessar o serviço com a configuração de proxy existente.
 
-Para testar: suítes anteriores mais `npm run test:accounts`, `npm run typecheck` e `npm run build`. O teste de conta roda somente em PGlite isolado; não exclui usuários remotos. Consulte [Autenticação](AUTENTICACAO.md) para implantação dos modelos de e-mail e limites do transporte. O SMTP padrão está limitado a 2 e-mails/hora; provedor personalizado ainda é necessário para cadastro geral. Modelos versionados em `supabase/templates/` mantêm o link padrão e acrescentam código e link para outro navegador. A checagem HTTP direta da Vercel foi bloqueada pelo proxy de rede do ambiente (403 no túnel); não confundir push confirmado com implantação web verificada.
+Para testar: suítes anteriores mais `npm run test:accounts`, `npm run typecheck` e `npm run build`. O teste de conta roda somente em PGlite isolado; não exclui usuários remotos. Consulte [Autenticação](AUTENTICACAO.md) para implantação dos modelos de e-mail e limites do transporte. O SMTP padrão está limitado a 2 e-mails/hora; provedor personalizado ainda é necessário para cadastro geral. Modelos em `supabase/templates/` foram preparados, mas o Supabase recusou aplicá-los no plano gratuito sem SMTP próprio. O fluxo usa os links padrão com callback `/auth/finish`, que conclui sessão em outro navegador sem depender de PKCE local. A checagem HTTP direta da Vercel foi bloqueada pelo proxy de rede do ambiente (403 no túnel); não confundir push confirmado com implantação web verificada.
 
 ## Atualização final — Feed, álbum e primeira impressão bilateral
 

@@ -11,9 +11,7 @@ export function EmailHelp({ recovery = false, initialEmail = "" }: { recovery?: 
  return <section className="panel"><form action={action} className="form">
   <label>E-mail da conta<input name="email" type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} required maxLength={254} /></label>
   <button name="mode" value={recovery ? "recovery" : "resend"} className="button button-primary" disabled={pending || cooldown>0}>{cooldown ? `Reenviar em ${cooldown}s` : recovery ? "Enviar recuperação de senha" : "Reenviar confirmação"}</button>
-  <p>Você pode abrir o link recebido ou digitar o código do e-mail abaixo, inclusive em outro navegador.</p>
-  <label>Código do e-mail<input name="token" inputMode="numeric" autoComplete="one-time-code" maxLength={10} /></label>
-  <button name="mode" value={recovery ? "verify_recovery" : "verify"} className="button button-secondary" disabled={pending}>Confirmar código</button>
+  <p>Abra o link recebido por e-mail para continuar. Confira também o spam. Não é necessário digitar um código.</p>
   <p className="notice" role="status">{state.message}</p>
  </form><Link href="/entrar">Voltar para entrar</Link>{!recovery ? <p><Link href="/recuperar-senha">Já confirmei, mas esqueci minha senha</Link></p> : null}</section>;
 }

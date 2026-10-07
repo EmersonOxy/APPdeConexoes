@@ -109,7 +109,7 @@ A opção não pode ser alterada nem a avaliação pode ser apagada pelo autor n
 
 ## Continuidade e compatibilidade — 7 de outubro de 2026
 
-- Busca por nome e filtro de não lidas em Primeiro contato e Conversas aplicados automaticamente, sem botão de confirmação. Listas paginadas por data de criação e ID em lotes de 30, sem limite total de 100; o histórico de mensagens tem paginação própria.
+- Busca por nome ou usuário (com ou sem @) e filtro de não lidas em Primeiro contato e Conversas aplicados automaticamente, sem botão de confirmação. Listas paginadas por data de criação e ID em lotes de 30, sem limite total de 100; o histórico de mensagens tem paginação própria.
 - Atualizações da conversa preservam mensagens antigas carregadas e recebem novas mensagens por cursor, sem duplicatas.
 - Conversas e avaliações existentes não são apagadas nem recebem notas fabricadas. Se faltar primeira impressão válida de algum participante, a conversa aguarda esse pré-requisito para novas mensagens/avaliações de interação; leitura e encerramento permanecem disponíveis.
 - Preferências antigas de desinteresse não tinham data: a migração preserva cada uma durante sete dias a partir da aplicação. Novas escolhas contam sete dias a partir do clique.
@@ -118,7 +118,7 @@ A opção não pode ser alterada nem a avaliação pode ser apagada pelo autor n
 
 - Manter a sessão entre visitas e abrir diretamente o Feed após login, confirmação e retorno ao aplicativo. Cookies persistentes de 30 dias, renovados durante o uso; sair encerra a sessão local. Perfil incompleto continua com orientação para completar os campos.
 - Login por e-mail ou nome de usuário único, diferente do nome exibido. Novos cadastros escolhem usuário; contas existentes podem defini-lo em Minha conta. Usuário: 3–24 caracteres, começando por letra, com letras sem acento, números e underscore, sem distinção de maiúsculas/minúsculas.
-- Reenvio de confirmação e recuperação de senha disponíveis na entrada. Confirmação por link ou código recebido por e-mail, inclusive em outro navegador. Não dispensar a verificação de e-mail para contornar falhas de entrega.
+- Reenvio de confirmação e recuperação de senha disponíveis na entrada. Confirmação por link recebido por e-mail, inclusive em outro navegador. Código numérico é alternativa somente quando houver modelo de e-mail configurado para incluí-lo; a interface atual usa apenas link. Não dispensar a verificação de e-mail para contornar falhas de entrega.
 - Confirmar a senha ao cadastrar; troca de senha com senha atual em Minha conta e recuperação por e-mail quando esquecida.
 - **Exclusão definitiva aprovada pelo responsável:** remover conta, fotos, conversas associadas, mensagens, avaliações e registros associados ao conteúdo removido. A interface exige senha atual e a frase EXCLUIR MINHA CONTA, explicando que outras pessoas também perderão o histórico compartilhado. Não desativar apenas nem fabricar anonimização em substituição à decisão.
 - Lista de bloqueados com desbloqueio. Desbloquear remove somente o bloqueio de quem executou a ação; um bloqueio da outra pessoa continua valendo. Não reabrir conversas encerradas automaticamente.
