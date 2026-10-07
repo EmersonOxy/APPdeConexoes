@@ -36,4 +36,4 @@ Migração adicional aplicada: `20261007052000_duoeto_inbox_username_search.sql`
 
 Migrações anteriores: `20261007050000_duoeto_accounts_inbox.sql` e `20261007051000_duoeto_delete_related_reports.sql`. Conferir histórico antes de aplicar. O rascunho `supabase/drafts` continua fora do fluxo de implantação.
 
-Verificação complementar: links padrão gerados pelo Auth redirecionaram para `/auth/finish` com sessão válida; confirmação e recuperação foram concluídas em contextos de navegador novos. O callback de produção e localhost:3000 estão autorizados no Supabase. Testes administrativos não enviam e-mail e não comprovam entrega; SMTP e verificação do deploy web continuam pendentes.
+Verificação complementar: links padrão gerados pelo Auth redirecionaram para `/auth/finish` com sessão válida; confirmação e recuperação foram concluídas em contextos de navegador novos. O callback de produção e localhost:3000 estão autorizados no Supabase. Testes administrativos não enviam e-mail e não comprovam entrega; SMTP continua pendente. Depois do push `c20b0fb`, as páginas públicas `/auth/finish` e `/confirmar` na Vercel responderam 200 e exibiram as correções esperadas.

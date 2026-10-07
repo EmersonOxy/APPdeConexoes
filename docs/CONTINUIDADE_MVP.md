@@ -4,7 +4,7 @@
 - Concluído `/auth/finish`, que estava sem commit: links padrão de confirmação/recuperação iniciam sessão mesmo em outro navegador. Supabase atualizado para autorizar os callbacks de produção e localhost:3000.
 - Removida a solicitação de código numérico da interface: os e-mails reais atuais só incluem link. Modelos com código não foram aplicados porque o provedor recusou a personalização sem SMTP próprio/upgrade.
 - Envio de e-mails **não está concluído para cadastro geral**: SMTP próprio ainda precisa ser configurado; transporte padrão tem limite de 2 envios/hora. Testes administrativos de links não comprovam entrega de e-mails.
-- Restante do lote anterior está no commit `c465834`; banco e Edge Function foram aplicados. Deploy Vercel não foi confirmado por esta nuvem (restrição do proxy).
+- Restante do lote anterior está no commit `c465834`; banco e Edge Function foram aplicados. Após o push `c20b0fb`, a Vercel respondeu 200 em `/auth/finish` com o novo callback e em `/confirmar` com a orientação por link sem código; publicação das correções confirmada por HTTP. Entrega de e-mail continua sem validação.
 
 # Continuidade do MVP — 7 de outubro de 2026
 
@@ -20,7 +20,7 @@ Os fluxos autenticados foram exercitados com contas temporárias: confirmação 
 
 O navegador da nuvem não confia no certificado intermediário para acesso direto ao Supabase; não foi desativada a verificação TLS. A interface usou o fallback periódico, e o Realtime foi confirmado separadamente por assinatura autenticada e recebimento do evento via WebSocket com certificado verificado. Node.js nesta nuvem usa `NODE_USE_ENV_PROXY=1` para acessar o serviço com a configuração de proxy existente.
 
-Para testar: suítes anteriores mais `npm run test:accounts`, `npm run typecheck` e `npm run build`. O teste de conta roda somente em PGlite isolado; não exclui usuários remotos. Consulte [Autenticação](AUTENTICACAO.md) para implantação dos modelos de e-mail e limites do transporte. O SMTP padrão está limitado a 2 e-mails/hora; provedor personalizado ainda é necessário para cadastro geral. Modelos em `supabase/templates/` foram preparados, mas o Supabase recusou aplicá-los no plano gratuito sem SMTP próprio. O fluxo usa os links padrão com callback `/auth/finish`, que conclui sessão em outro navegador sem depender de PKCE local. A checagem HTTP direta da Vercel foi bloqueada pelo proxy de rede do ambiente (403 no túnel); não confundir push confirmado com implantação web verificada.
+Para testar: suítes anteriores mais `npm run test:accounts`, `npm run typecheck` e `npm run build`. O teste de conta roda somente em PGlite isolado; não exclui usuários remotos. Consulte [Autenticação](AUTENTICACAO.md) para implantação dos modelos de e-mail e limites do transporte. O SMTP padrão está limitado a 2 e-mails/hora; provedor personalizado ainda é necessário para cadastro geral. Modelos em `supabase/templates/` foram preparados, mas o Supabase recusou aplicá-los no plano gratuito sem SMTP próprio. O fluxo usa os links padrão com callback `/auth/finish`, que conclui sessão em outro navegador sem depender de PKCE local. A checagem da Vercel inicialmente foi bloqueada pelo proxy (403 no túnel), mas voltou a funcionar: `/auth/finish` e `/confirmar` exibem as correções após o push `c20b0fb`.
 
 ## Atualização final — Feed, álbum e primeira impressão bilateral
 
