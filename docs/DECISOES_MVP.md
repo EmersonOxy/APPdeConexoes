@@ -130,3 +130,8 @@ A opção não pode ser alterada nem a avaliação pode ser apagada pelo autor n
 - Abrir a conversa com a aba visível marca como lidas apenas notificações até o ponto de leitura retornado pelo servidor. Mensagens chegadas depois continuam novas. Contatos podem ser marcados como lidos sem abrir o texto.
 - Atualização por eventos Realtime privados e consulta periódica de recuperação. Eventos carregam apenas um contador, sem texto de mensagem nem e-mail.
 - Os filtros do Feed ficam em página separada, com Aplicar, Cancelar e restauração do padrão. Ao aplicar, o servidor carrega outra seleção antes de exibir os resultados. Os filtros de Mensagens respondem automaticamente à digitação e à chegada de dados.
+
+## Continuação autorizada — 7 de outubro de 2026
+
+- Manter temporariamente o envio padrão limitado de e-mail do Supabase. Configuração de SMTP próprio adiada pelo responsável; confirmação por link continua obrigatória.
+- Notificações oferecem histórico paginado, total global de não lidas e acesso ao item correspondente. Destinos verificam novamente autorização e bloqueios; abrir um contato não revela automaticamente seu conteúdo.

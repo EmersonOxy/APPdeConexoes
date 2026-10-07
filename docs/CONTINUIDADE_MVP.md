@@ -1,3 +1,14 @@
+# Estado atual — revisão completa da Bíblia
+
+Consulte [Auditoria funcional](AUDITORIA_FUNCIONAL.md) para a comparação de todas as seções com o código e a lista consolidada de decisões restantes.
+
+- Envio padrão limitado do Supabase mantido temporariamente por decisão explícita do responsável; SMTP próprio adiado.
+- Notificações: páginas de 30 sem teto de 100, contagem global de não lidas, atualização em tempo real e links para contato/conversa/denúncia específicos, incluindo itens fora da primeira página.
+- Migração adicional: `20261007053000_duoeto_notification_navigation.sql`. Novas RPCs autenticadas verificam participação, bloqueios e autoria das denúncias; não expõem texto de mensagem no histórico de notificações.
+- Migração `20261007053000` aplicada no Supabase. Dez suítes (incluindo `test:notifications`), TypeScript e build passaram. Navegador com contas temporárias validou 106 notificações, links específicos, leitura e bloqueios; dados de teste foram removidos.
+
+As seções abaixo são um **histórico das entregas**. Referências antigas a upload/publicação não verificados foram superadas pelos testes autenticados e pela checagem da Vercel descritos nas atualizações posteriores.
+
 # Revisão complementar — autenticação e busca
 
 - Aplicada a migração `20261007052000_duoeto_inbox_username_search.sql`: busca em conversas e primeiros contatos aceita nome ou usuário, com/sem `@`, preservando privacidade, bloqueios, não lidas e paginação.
@@ -8,7 +19,7 @@
 
 # Continuidade do MVP — 7 de outubro de 2026
 
-Referências de produto: [Bíblia](BIBLIA_DO_PRODUTO.md) e [Decisões do MVP](DECISOES_MVP.md). As decisões posteriores prevalecem sobre propostas antigas. Este documento registra a implementação local e a aplicação validada no Supabase remoto. A implantação na Vercel não foi verificada por esta tarefa.
+Referências de produto: [Bíblia](BIBLIA_DO_PRODUTO.md) e [Decisões do MVP](DECISOES_MVP.md). As decisões posteriores prevalecem sobre propostas antigas. Este documento registra a implementação local e a aplicação validada no Supabase remoto. A publicação das correções anteriores foi conferida na Vercel.
 
 ## Atualização — conta, confirmação e mensagens
 

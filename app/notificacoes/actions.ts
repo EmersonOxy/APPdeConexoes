@@ -8,3 +8,9 @@ export async function notificationAction(action: "notifications" | "read_notific
   const { data, error } = await supabase.rpc("duoeto_safety", { action, payload: { id } });
   return { data, error: error ? "Não foi possível atualizar as notificações." : null };
 }
+export async function notificationPage(before?:string){
+ if(before&&!/^[1-9][0-9]{0,18}$/.test(before))return {data:null,error:'Página inválida.'};
+ const supabase=await createServerSupabaseClient(false);
+ const {data,error}=await supabase.rpc('duoeto_notification_page',{before_id:before??null});
+ return {data,error:error?'Não foi possível atualizar as notificações.':null};
+}

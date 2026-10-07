@@ -12,11 +12,11 @@ import { connectionAction } from "@/app/mensagens/actions";
 import { excludeProfile } from "@/app/feed/actions";
 import type { Chat, Contact, Conversation, Inbox } from "@/lib/connections";
 
-export function Messages({ initial, initialError, userId }: { initial: Inbox; initialError?: string | null; userId: string }) {
+export function Messages({ initial, initialError, userId, initialConversation=null, initialTab="conversations" }: { initialConversation?: Conversation|null; initialTab?: "contacts"|"conversations"; initial: Inbox; initialError?: string | null; userId: string }) {
   const [inbox, setInbox] = useState(initial);
   const [notice, setNotice] = useState(initialError ?? "");
-  const [conversation, setConversation] = useState<Conversation | null>(null);
-  const [tab, setTab] = useState<"contacts" | "conversations">("conversations");
+  const [conversation, setConversation] = useState<Conversation | null>(initialConversation);
+  const [tab, setTab] = useState<"contacts" | "conversations">(initialTab);
   const [search, setSearch] = useState("");
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -81,7 +81,7 @@ export function Messages({ initial, initialError, userId }: { initial: Inbox; in
   </>;
 }
 
-function ContactCard({ contact, onDone }: { contact: Contact; onDone: (id?: string) => Promise<void> }) {
+export function ContactCard({ contact, onDone }: { contact: Contact; onDone: (id?: string) => Promise<void> }) {
   const [body, setBody] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [notice, setNotice] = useState("");
@@ -102,7 +102,7 @@ function ContactCard({ contact, onDone }: { contact: Contact; onDone: (id?: stri
       } catch { setNotice("Não foi possível concluir. Atualize para conferir o estado do contato."); }
     });
   }
-  const labels: Record<string, string> = { pending: "Aguardando resposta", declined: "Recusado", expired: "Expirado" };
+  const labels: Record<string, string> = { pending: "Aguardando resposta", declined: "Recusado", expired: "Expirado", accepted: "Aceito" };
   return <article className="panel" aria-busy={pending}>
     <p className="eyebrow">{contact.outgoing ? "Enviado" : "Recebido"} · {labels[contact.status] ?? contact.status}</p>
     <h2 className="person-name"><Link href={`/pessoa/${contact.peer_id}`}>{contact.name}</Link> {contact.unread ? <span className="unread-badge" aria-label={`${contact.unread} não lidas`}>{contact.unread}</span> : null}</h2>
@@ -116,6 +116,7 @@ function ContactCard({ contact, onDone }: { contact: Contact; onDone: (id?: stri
       <button className="button button-primary" disabled={pending} onClick={() => act("accept")}>Aceitar e conversar</button>
       <button className="button button-secondary" disabled={pending} onClick={() => act("decline")}>Recusar</button>
     </div> : null}
+    {contact.conversation_id ? <Link href={`/mensagens?conversa=${contact.conversation_id}`}>Abrir conversa</Link> : null}
     {contact.editable ? <div>
       <p className="field-help">Você pode editar ou excluir durante uma hora, enquanto não houver resposta.</p>
       {body !== null ? <form className="form" onSubmit={event => { event.preventDefault(); act("edit"); }}>

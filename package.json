@@ -15,7 +15,8 @@
     "test:discovery": "node scripts/test-discovery.mjs",
     "test:feed-gallery": "node scripts/test-feed-gallery.mjs",
     "test:messages": "node scripts/test-message-history.mjs",
-    "test:accounts": "node scripts/test-accounts-inbox.mjs && node scripts/test-username-edge.mjs"
+    "test:accounts": "node scripts/test-accounts-inbox.mjs && node scripts/test-username-edge.mjs",
+    "test:notifications": "node scripts/test-notification-navigation.mjs"
   },
   "engines": {
     "node": ">=22.0.0"
