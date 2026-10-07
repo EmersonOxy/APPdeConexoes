@@ -27,3 +27,9 @@ Esses testes não substituem a verificação do serviço Storage real depois de 
 ## Escopo
 
 O limite de 18 anos é a decisão operacional deste corte. Objetivos permanecem opcionais conforme a bíblia e a orientação aceita para esta etapa; isso substitui a obrigatoriedade sugerida no documento DECISOES_MVP.
+
+## Atualização — álbum de até seis fotos
+
+O limite confirmado é seis fotos, incluindo a principal obrigatória. Cada arquivo tem até 3 MB e é enviado em uma requisição separada; o servidor valida JPEG/PNG/WebP, limita resolução de entrada, aplica orientação, redimensiona e recodifica em JPEG sem metadados. Só depois o formulário salva a principal e as fotos complementares. Isso evita um único envio de 18 MB na hospedagem.
+
+A edição permite escolher a principal e remover imagens do álbum, mantendo ao menos a principal. As complementares mantêm a ordem de adição. O banco valida propriedade dos objetos, existência, unicidade e limite de seis, inclusive em chamadas diretas. Perfil público e Feed compartilham a galeria privada. Remover do álbum revoga compartilhamento; limpeza física de uploads antigos/incompletos depende da política de retenção ainda pendente.

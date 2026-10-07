@@ -4,16 +4,16 @@ export const stateOptions = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO
 export const photoBucket = "duoeto-profile-photos";
 export type Profile = {
   display_name: string; birth_date: string; city: string; state: string;
-  about: string; interests: string[]; objectives: string[]; photo_path: string;
+  about: string; interests: string[]; objectives: string[]; photo_path: string; gallery_paths?: string[];
 };
-export type ProfileState = { message: string; success: boolean; profile?: Profile; photoUrl?: string };
+export type ProfileState = { message: string; success: boolean; profile?: Profile; photoUrl?: string; galleryUrls?: string[] };
 export function ageFromBirthDate(value: string, today = new Date()): number {
   const birth = new Date(value + "T00:00:00Z");
   let age = today.getUTCFullYear() - birth.getUTCFullYear();
   if (today.getUTCMonth() < birth.getUTCMonth() || (today.getUTCMonth() === birth.getUTCMonth() && today.getUTCDate() < birth.getUTCDate())) age--;
   return age;
 }
-export function readProfile(form: FormData): Omit<Profile, "photo_path"> {
+export function readProfile(form: FormData): Omit<Profile, "photo_path" | "gallery_paths"> {
   const text = (name: string) => String(form.get(name) ?? "").trim();
   const profile = {
     display_name: text("display_name"), birth_date: text("birth_date"),

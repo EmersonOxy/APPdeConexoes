@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { excludeProfile, loadFeed, restoreHiddenProfiles } from "@/app/feed/actions";
 import { interestOptions, objectiveOptions } from "@/lib/profile";
 import { defaultFeedFilters, type FeedFilters, type FeedProfile, type FeedResult } from "@/lib/feed";
+import { ProfileGallery } from "./profile-gallery";
 import { ReportForm } from "./report-form";
 import { ReputationPanel } from "./reputation";
 
@@ -18,15 +19,6 @@ export function Feed({ initial }: { initial: FeedResult }) {
   const [pending, startTransition] = useTransition();
   const busy = useRef(false);
   const current = profiles[0];
-
-  // Revalidate when returning to the tab: do not retain stale cards after a block.
-  useEffect(() => {
-    const refresh = () => {
-      if (document.visibilityState === "visible") window.location.reload();
-    };
-    document.addEventListener("visibilitychange", refresh);
-    return () => document.removeEventListener("visibilitychange", refresh);
-  }, []);
 
   function advance(kind?: "block" | "hide") {
     if (busy.current || !current) return;
@@ -45,7 +37,7 @@ export function Feed({ initial }: { initial: FeedResult }) {
         const nextTrail = [...trail.slice(0, cursor + 1).filter(id => !kind || id !== current.user_id), ...(result.profiles[0] ? [result.profiles[0].user_id] : [])].slice(-50);
         setTrail(nextTrail); setCursor(result.profiles.length ? nextTrail.length - 1 : nextTrail.length);
         setProfiles(result.profiles);
-        setNotice(result.error ?? (kind === "block" ? "Perfil bloqueado." : kind === "hide" ? "Perfil removido do seu Feed." : ""));
+        setNotice(result.error ?? (kind === "block" ? "Perfil bloqueado." : kind === "hide" ? "Perfil ocultado do seu Feed por 7 dias." : ""));
       } catch { setNotice("Não foi possível concluir. Tente novamente."); }
       finally { busy.current = false; }
     });
@@ -102,26 +94,47 @@ export function Feed({ initial }: { initial: FeedResult }) {
   }
   function next() { if (cursor < trail.length - 1) revisit(cursor + 1); else advance(); }
 
+  const navigation = useRef({ next, previous: () => cursor > 0 && revisit(cursor - 1) });
+  navigation.current = { next, previous: () => cursor > 0 && revisit(cursor - 1) };
+  useEffect(() => {
+    const key = (event: KeyboardEvent) => {
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.defaultPrevented || event.repeat) return;
+      if (event.target instanceof Element && event.target.closest("input,textarea,select,[contenteditable=true],details[open],dialog")) return;
+      if (event.key === "ArrowDown") { event.preventDefault(); navigation.current.next(); }
+      if (event.key === "ArrowUp") { event.preventDefault(); navigation.current.previous(); }
+    };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, []);
+  // Reauthorize the currently displayed card when the browser tab returns.
+  const revalidate = useRef(() => revisit(cursor));
+  revalidate.current = () => revisit(cursor);
+  useEffect(() => {
+    const update = () => { if (document.visibilityState === "visible") revalidate.current(); };
+    document.addEventListener("visibilitychange", update);
+    return () => document.removeEventListener("visibilitychange", update);
+  }, []);
+
   return <div className="feed" aria-busy={pending}>
     <section>
-      {current ? <ProfileCard key={current.user_id} profile={current} onNext={next} onPrevious={() => cursor > 0 && revisit(cursor - 1)} /> : <div className="panel">
+      {current ? <ProfileCard key={current.user_id} profile={current} onSent={() => advance()} onNext={next} onPrevious={() => cursor > 0 && revisit(cursor - 1)} /> : <div className="panel">
         <h2>{pending ? "Carregando perfis…" : "Nenhum perfil disponível agora"}</h2>
         <p>Você chegou ao fim dos perfis disponíveis nesta visita. Volte mais tarde para conhecer outras pessoas.</p>
         <button className="button button-secondary" disabled={pending} onClick={() => retry()}>Tentar novamente</button>
       </div>}
       {current ? <div className="feed-actions">
-        <button className="pass" disabled={pending} onClick={next}>Passar</button>
-        <button className="interest" disabled={pending} onClick={() => advance("hide")}>Não tenho interesse</button>
+        <button className="button button-secondary" aria-label="Próximo perfil, seta para baixo" disabled={pending} onClick={next}>↓ Próximo perfil</button>
+        <button className="interest" disabled={pending} onClick={() => advance("hide")} title="Ocultar apenas do seu Feed por 7 dias">Não tenho interesse · 7 dias</button>
         <button className="button button-secondary" disabled={pending} onClick={() => advance("block")}>Bloquear</button>
       </div> : null}
-      <div className="button-row">{cursor > 0 ? <button className="button button-secondary" disabled={pending} onClick={() => revisit(cursor - 1)}>Perfil anterior</button> : null}
+      <div className="button-row">{cursor > 0 ? <button className="button button-secondary" disabled={pending} onClick={() => revisit(cursor - 1)} aria-label="Perfil anterior, seta para cima">↑ Perfil anterior</button> : null}
         {cursor < trail.length - 1 && !current ? <button className="button button-secondary" disabled={pending} onClick={() => revisit(cursor + 1)}>Próximo perfil</button> : null}</div>
       <p role="status" className="notice">{notice}</p>
     </section>
-    <aside className="panel">
-      <h2>Descoberta</h2>
+    <aside className="feed-settings">
+      <details className="panel"><summary>Filtros e preferências</summary>
       <p>Perfis em ordem aleatória. Cidade e estado são as únicas informações de localização exibidas.</p>
-      <p className="muted">Na foto, deslize para cima para avançar ou para baixo para voltar. O histórico guarda até 50 perfis nesta visita e verifica novamente a disponibilidade.</p>
+      <p className="muted">Deslize para cima para avançar, para baixo para voltar e para os lados para ver as fotos. No computador, use ↑ e ↓. O histórico guarda até 50 perfis nesta visita e verifica novamente a disponibilidade.</p>
       <form className="form" onSubmit={event => { event.preventDefault(); applyFilters(); }}>
         <fieldset disabled={pending}><legend>Filtros do Feed</legend>
           <label>Idade mínima<input type="number" min={18} max={120} required value={draftFilters.min_age} onChange={event => setDraftFilters(previous => ({ ...previous, min_age: Number(event.target.value) }))} /></label>
@@ -135,32 +148,33 @@ export function Feed({ initial }: { initial: FeedResult }) {
         </fieldset>
       </form>
       <details><summary>Preferências do Feed</summary>
-        <p>Reverter “Não tenho interesse” permite que os perfis ocultados voltem em uma próxima visita. Bloqueios são mantidos.</p>
+        <p>“Não tenho interesse” oculta a pessoa só do seu Feed por 7 dias. Você pode desfazer antes desse prazo. Isso não bloqueia contato nem altera avaliações.</p>
         <button className="button button-secondary" disabled={pending} onClick={() => retry(true)}>Restaurar perfis sem interesse</button>
+      </details>
       </details>
     </aside>
   </div>;
 }
 
-function ProfileCard({ profile, onNext, onPrevious }: { profile: FeedProfile; onNext: () => void; onPrevious: () => void }) {
-  const touchY = useRef<number | null>(null);
-  const [photoFailed, setPhotoFailed] = useState(false);
-  return <article className="profile-card">
-    <div style={{ touchAction: "pan-x" }} onTouchStart={event => { touchY.current = event.touches.length === 1 ? event.touches[0].clientY : null; }} onTouchEnd={event => {
-      if (touchY.current === null || !event.changedTouches[0]) return;
-      const difference = event.changedTouches[0].clientY - touchY.current; touchY.current = null;
-      if (difference < -70) onNext(); else if (difference > 70) onPrevious();
-    }} onTouchCancel={() => { touchY.current = null; }}>
-    {photoFailed ? <div className="profile-cover"><p>Foto indisponível no momento.</p></div> :
-      <img className="feed-photo" src={`/feed/photo/${profile.user_id}`} alt={`Foto de ${profile.display_name}`} onError={() => setPhotoFailed(true)} />}</div>
+function ProfileCard({ profile, onNext, onPrevious, onSent }: { profile: FeedProfile; onNext: () => void; onPrevious: () => void; onSent: () => void }) {
+  return <article className="profile-card discovery-card">
+    <div className="discovery-visual">
+      <ProfileGallery target={profile.user_id} name={profile.display_name} onNext={onNext} onPrevious={onPrevious} />
+      <div className="discovery-caption">
+        <p className="eyebrow">Uma nova conexão começa aqui</p>
+        <h2>{profile.display_name}, {profile.age}</h2>
+        <p>{profile.city}, {profile.state}</p>
+        <div className="chips">{profile.objectives.map(value => <span className="chip chip-light" key={value}>{value}</span>)}</div>
+      </div>
+    </div>
     <div className="card-body">
-      <h2 className="person-name">{profile.display_name}, {profile.age}</h2>
-      <p className="muted">{profile.city}, {profile.state}</p>
-      {profile.about ? <p>{profile.about}</p> : null}
-      <div className="chips">{profile.interests.map(interest => <span className="chip" key={interest}>{interest}</span>)}</div>
-      {profile.objectives.length ? <p>Busca: {profile.objectives.join(", ")}</p> : null}
-      <ReputationPanel target={profile.user_id} />
-      <ReportForm subject="profile" target={profile.user_id} />
+      <p className="field-help">↑ Voltar · ↓ Próximo · Deslize nas fotos para explorar</p>
+      <details><summary>Conhecer e avaliar {profile.display_name}</summary>
+        {profile.about ? <p className="profile-about">{profile.about}</p> : null}
+        <div className="chips">{profile.interests.map(interest => <span className="chip" key={interest}>{interest}</span>)}</div>
+        <ReputationPanel target={profile.user_id} onSent={onSent} />
+        <ReportForm subject="profile" target={profile.user_id} />
+      </details>
     </div>
   </article>;
 }

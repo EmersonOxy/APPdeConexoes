@@ -11,10 +11,11 @@ export default async function ProfilePage() {
   const user = await requireUser();
   const supabase = await createServerSupabaseClient(false);
   const { data, error } = await supabase.from("duoeto_profiles")
-    .select("display_name,birth_date,city,state,about,interests,objectives,photo_path")
+    .select("display_name,birth_date,city,state,about,interests,objectives,photo_path,gallery_paths")
     .eq("user_id", user.id).maybeSingle();
   const profile = data as Profile | null;
   const photo = profile?.photo_path ? await supabase.storage.from(photoBucket).createSignedUrl(profile.photo_path, 3600) : null;
+  const galleryPhotos = profile?.gallery_paths?.length ? await supabase.storage.from(photoBucket).createSignedUrls(profile.gallery_paths, 3600) : null;
   return (
     <ApplicationShell>
       <main className="page">
@@ -24,7 +25,7 @@ export default async function ProfilePage() {
           <p className="muted">Essencial obrigatório, personalidade opcional. Você decide o que contar.</p>
           <form action={signOut}><button className="button button-secondary" type="submit">Sair da conta</button></form>
         </section>
-        {error ? <section className="panel"><h2>Seu perfil estará disponível em breve</h2><p className="muted">Sua conta está confirmada. Estamos preparando o armazenamento dos perfis; tente novamente mais tarde.</p></section> : <ProfileEditor userId={user.id} initialProfile={profile} initialPhotoUrl={photo?.data?.signedUrl} />}
+        {error ? <section className="panel"><h2>Seu perfil estará disponível em breve</h2><p className="muted">Sua conta está confirmada. Estamos preparando o armazenamento dos perfis; tente novamente mais tarde.</p></section> : <ProfileEditor userId={user.id} initialProfile={profile} initialPhotoUrl={photo?.data?.signedUrl} initialGalleryUrls={galleryPhotos?.data?.map(photo => photo.signedUrl ?? "")} />}
       {profile ? <section className="panel"><h2>Sua reputação</h2><ReputationPanel target={user.id} readOnly /></section> : null}
         <Link href="/denuncias">Acompanhar minhas denúncias</Link>
       </main>

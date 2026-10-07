@@ -60,3 +60,5 @@ export async function safety(action,target=null,payload={}) {
 }
 
 await db.exec(await readFile(new URL("../supabase/migrations/20261007030000_duoeto_discovery_filters.sql", import.meta.url), "utf8"));
+
+await db.exec(await readFile(new URL("../supabase/migrations/20261007040000_duoeto_feed_gallery_prerequisites.sql", import.meta.url), "utf8"));

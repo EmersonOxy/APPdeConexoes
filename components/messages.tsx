@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { ReputationPanel } from "./reputation";
+import { mergeMessages } from "@/lib/message-history";
 import { ReportForm } from "./report-form";
 import { InteractionRating } from "./interaction-rating";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
@@ -13,11 +15,13 @@ export function Messages({ initial, initialError, userId }: { initial: Inbox; in
   const [notice, setNotice] = useState(initialError ?? "");
   const [selected, setSelected] = useState<string | null>(null);
   const [tab, setTab] = useState<"contacts" | "conversations">("contacts");
+  const [search, setSearch] = useState("");
+  const searchRef = useRef(search); searchRef.current = search;
   const sequence = useRef(0);
   const refresh = useCallback(async () => {
     const request = ++sequence.current;
     try {
-      const result = await connectionAction("list");
+      const result = await connectionAction("list", null, { search: searchRef.current.trim() });
       if (request !== sequence.current) return;
       if (result.error) { setNotice(result.error); setInbox({ contacts: [], conversations: [] }); }
       else { setInbox(result.data as Inbox); setNotice(""); }
@@ -29,6 +33,11 @@ export function Messages({ initial, initialError, userId }: { initial: Inbox; in
     document.addEventListener("visibilitychange", update);
     return () => { clearInterval(timer); document.removeEventListener("visibilitychange", update); sequence.current++; };
   }, [refresh]);
+  useEffect(() => {
+    sequence.current++;
+    const timer = setTimeout(() => void refresh(), 250);
+    return () => clearTimeout(timer);
+  }, [search, refresh]);
   const conversation = inbox.conversations.find(item => item.id === selected);
   return <>
     <div className="button-row" role="group" aria-label="Tipo de mensagens">
@@ -36,16 +45,17 @@ export function Messages({ initial, initialError, userId }: { initial: Inbox; in
       <button className="button button-secondary" aria-pressed={tab === "conversations"} onClick={() => setTab("conversations")}>Conversas</button>
       <button className="button button-secondary" onClick={() => void refresh()}>Atualizar</button>
     </div>
+    <label className="message-search">Buscar por nome<input type="search" value={search} maxLength={80} placeholder="Nome da pessoa" onChange={event => { sequence.current++; setSearch(event.target.value); }} /></label>
     <p role="status" className="notice">{notice}</p>
     {tab === "contacts" ? <section className="inbox-list" aria-label="Primeiros contatos">
       {inbox.contacts.length ? inbox.contacts.map(contact => <ContactCard key={contact.id} contact={contact} onDone={async id => {
         await refresh(); if (id) { setSelected(id); setTab("conversations"); }
-      }} />) : <div className="empty"><h2>Nenhum primeiro contato</h2><p>Você pode enviar um após avaliar alguém no Feed.</p><Link href="/feed">Explorar o Feed</Link></div>}
+      }} />) : <div className="empty"><h2>{search ? "Nenhum contato com esse nome" : "Nenhum primeiro contato"}</h2><p>Você pode enviar um após avaliar alguém no Feed.</p><Link href="/feed">Explorar o Feed</Link></div>}
     </section> : <div className="messages-layout">
       <nav className="panel conversation-list" aria-label="Suas conversas">
         {inbox.conversations.length ? inbox.conversations.map(item => <button className="conversation-choice" aria-pressed={selected === item.id} key={item.id} onClick={() => setSelected(item.id)}>
           <strong>{item.name}</strong><span>{item.status === "closed" ? "Encerrada" : "Conversa"}</span>
-        </button>) : <p>Quando alguém aceitar um contato, a conversa aparecerá aqui.</p>}
+        </button>) : <p>{search ? "Nenhuma conversa com esse nome." : "Quando alguém aceitar um contato, a conversa aparecerá aqui."}</p>}
       </nav>
       {conversation ? <ChatPanel key={conversation.id} conversation={conversation} userId={userId} onChanged={refresh} /> : <section className="empty"><h2>Suas conversas</h2><p>Selecione uma conversa para ler e responder.</p></section>}
     </div>}
@@ -77,6 +87,10 @@ function ContactCard({ contact, onDone }: { contact: Contact; onDone: (id?: stri
     <p className="eyebrow">{contact.outgoing ? "Enviado" : "Recebido"} · {labels[contact.status] ?? contact.status}</p>
     <h2 className="person-name"><Link href={`/pessoa/${contact.peer_id}`}>{contact.name}</Link></h2>
     {body === null ? <button className="button button-secondary" disabled={pending} onClick={() => act("contact")}>Ler mensagem</button> : <p className="message-text">{body}</p>}
+    {!contact.outgoing && contact.status === "pending" ? <details><summary>Avaliar a primeira impressão antes de aceitar</summary>
+      <p>Conheça o perfil e registre sua avaliação para iniciar a conversa.</p>
+      <ReputationPanel target={contact.peer_id} allowContact={false} />
+    </details> : null}
     {!contact.outgoing && contact.status === "pending" ? <div className="button-row">
       <button className="button button-primary" disabled={pending} onClick={() => act("accept")}>Aceitar e conversar</button>
       <button className="button button-secondary" disabled={pending} onClick={() => act("decline")}>Recusar</button>
@@ -102,15 +116,21 @@ function ChatPanel({ conversation, userId, onChanged }: { conversation: Conversa
   const [pending, startTransition] = useTransition();
   const [hasOlder, setHasOlder] = useState(false);
   const sequence = useRef(0);
+  const messagesRef = useRef<Chat | null>(chat); messagesRef.current = chat;
+  const accessGeneration = useRef(0);
   const requestId = useRef<{ body: string; id: string } | null>(null);
   const refresh = useCallback(async () => {
     const request = ++sequence.current;
     try {
-      const result = await connectionAction("conversation", conversation.id);
+      const result = await connectionAction("conversation", conversation.id, messagesRef.current?.messages.length ? { after: messagesRef.current.messages.at(-1)!.id } : {});
       if (request !== sequence.current) return;
-      if (result.error) { setChat(null); setNotice(result.error); }
-      else { setChat(result.data as Chat); setHasOlder(result.data.messages.length === 50); }
-    } catch { if (request === sequence.current) { setChat(null); setNotice("Não foi possível carregar a conversa."); } }
+      if (result.error) { accessGeneration.current++; setChat(null); setNotice(result.error); }
+      else {
+        setChat(previous => ({ ...result.data as Chat, messages: mergeMessages(previous?.messages ?? [], result.data.messages) }));
+        if (!messagesRef.current) setHasOlder(result.data.messages.length === 50);
+        setNotice("");
+      }
+    } catch { if (request === sequence.current) { setNotice("Não foi possível atualizar a conversa. Tentaremos novamente."); } }
   }, [conversation.id]);
   useEffect(() => {
     void refresh();
@@ -125,13 +145,15 @@ function ChatPanel({ conversation, userId, onChanged }: { conversation: Conversa
       try {
         if (action === "block") {
           const result = await excludeProfile(conversation.peer_id, "block");
-          if (result.error) setNotice(result.error); else { setChat(null); setBody(""); await onChanged(); }
+          if (result.error) setNotice(result.error); else { accessGeneration.current++; sequence.current++; setChat(null); setBody(""); await onChanged(); }
           return;
         }
         if (action === "older") {
+          const generation = accessGeneration.current;
           const result = await connectionAction("conversation", conversation.id, { before: chat?.messages[0]?.id ?? "0" });
-          if (result.error) { setChat(null); setNotice(result.error); return; }
-          setChat(previous => previous ? { ...previous, messages: [...result.data.messages, ...previous.messages] } : null);
+          if (generation !== accessGeneration.current) return;
+          if (result.error) { accessGeneration.current++; sequence.current++; setChat(null); setNotice(result.error); return; }
+          setChat(previous => previous ? { ...previous, messages: mergeMessages(result.data.messages, previous.messages) } : null);
           setHasOlder(result.data.messages.length === 50);
           return;
         }
@@ -162,10 +184,11 @@ function ChatPanel({ conversation, userId, onChanged }: { conversation: Conversa
           <p className="message-text">{message.body}</p>
         </li>)}
       </ol>
-      {chat.status === "active" ? <form className="form" onSubmit={event => { event.preventDefault(); act("message"); }}>
+      {chat.status === "active" && !chat.both_rated ? <div className="notice"><p>As duas pessoas precisam registrar a primeira impressão para conversar. As mensagens anteriores foram preservadas.</p><ReputationPanel target={conversation.peer_id} allowContact={false} /></div> : null}
+      {chat.status === "active" && chat.both_rated ? <form className="form" onSubmit={event => { event.preventDefault(); act("message"); }}>
         <label>Sua mensagem<textarea value={body} onChange={event => setBody(event.target.value)} maxLength={5000} required /></label>
         <button className="button button-primary" disabled={pending || !body.trim()}>Enviar mensagem</button>
-      </form> : <p>Conversa encerrada. Novas mensagens não podem ser enviadas.</p>}
+      </form> : chat.status === "closed" ? <p>Conversa encerrada. Novas mensagens não podem ser enviadas.</p> : null}
     </> : <p>{notice ? "Conversa indisponível." : "Carregando conversa…"}</p>}
     <InteractionRating conversationId={conversation.id} revision={Number(chat?.messages.at(-1)?.id ?? 0)} />
     <ReportForm subject="conversation" target={conversation.id} />

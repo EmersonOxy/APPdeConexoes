@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import { mergeMessages } from '../lib/message-history.ts';
+const make = id => ({id:String(id),author:'a',body:'texto',created_at:'2026-10-07'});
+const old = Array.from({length:55},(_,i)=>make(i+1));
+const latest = Array.from({length:50},(_,i)=>make(i+11));
+const result = mergeMessages(old, latest);
+assert.equal(result.length,60);
+assert.equal(result[0].id,'1');
+assert.equal(result.at(-1).id,'60');
+assert.deepEqual(mergeMessages(result,latest),result);
+assert.deepEqual(mergeMessages([], [make('9007199254740993'),make('9007199254740992')]).map(m=>m.id),['9007199254740992','9007199254740993']);
+console.log('PASS: histórico preservado, respostas sobrepostas sem duplicatas, ordenação bigint.');

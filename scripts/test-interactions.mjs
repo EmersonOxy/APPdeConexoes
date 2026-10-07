@@ -6,6 +6,7 @@ await asUser(alice);
 await rpc('rate',bob,{score:4,visibility:'private'});
 const contact=(await rpc('send',bob,{body:'Olá'})).id;
 await asUser(bob);
+await rpc('rate',alice,{score:4,visibility:'name'});
 const chat=(await rpc('accept',contact)).id;
 await asUser(alice);
 assert.equal((await rpc('interaction',chat)).eligible,false);

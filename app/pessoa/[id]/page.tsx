@@ -1,3 +1,4 @@
+import { ProfileGallery } from "@/components/profile-gallery";
 import { notFound } from "next/navigation";
 import { ApplicationShell } from "@/components/application-shell";
 import { ReportForm } from "@/components/report-form";
@@ -13,6 +14,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
   if (result.error || !result.data) notFound();
   const profile = result.data as FeedProfile;
   return <ApplicationShell><main className="page profile-workspace"><article className="panel">
+    <ProfileGallery key={id} target={id} name={profile.display_name} />
     <h1 className="person-name">{profile.display_name}, {profile.age}</h1>
     <p>{profile.city}, {profile.state}</p><p className="profile-about">{profile.about}</p>
     <div className="chips">{profile.interests.map(interest => <span className="chip" key={interest}>{interest}</span>)}</div>

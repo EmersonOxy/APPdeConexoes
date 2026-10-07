@@ -39,6 +39,7 @@ await assert.rejects(safety('report',contact,{...reportPayload,subject:'contact'
 await assert.rejects(safety('report',review.id,{...reportPayload,subject:'first_impression'}),/indisponível/);
 await asUser(bob);
 await safety('report',contact,{...reportPayload,subject:'contact',request_id:randomUUID()});
+await rpc('rate',alice,{score:4,visibility:'name'});
 const chat=(await rpc('accept',contact)).id;
 await asUser(alice);
 assert.equal((await safety('notifications'))[0].kind,'contact_accepted');

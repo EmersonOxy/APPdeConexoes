@@ -28,7 +28,7 @@ export async function excludeProfile(target: string, kind: "block" | "hide") {
   const supabase = await createServerSupabaseClient();
   const { data, error: authError } = await supabase.auth.getUser();
   if (authError || !data.user?.email_confirmed_at || data.user.id === target) return { error: "Entre com sua conta confirmada para continuar." };
-  const { error } = await supabase.from(kind === "block" ? "duoeto_blocks" : "duoeto_feed_hidden")
+  const { error } = kind === "hide" ? await supabase.rpc("duoeto_hide_profile", { target }) : await supabase.from("duoeto_blocks")
     .upsert({ owner_id: data.user.id, target_id: target }, { onConflict: "owner_id,target_id", ignoreDuplicates: true });
   return error ? { error: "Não foi possível salvar. Tente novamente." } : {};
 }

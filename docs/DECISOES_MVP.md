@@ -55,16 +55,24 @@ A opção não pode ser alterada nem a avaliação pode ser apagada pelo autor n
 - “Ainda pensando” é uma opção de objetivo do perfil, não um filtro padrão obrigatório.
 - O filtro de reputação mínima só inclui perfis que já tenham Nota geral. Quem estiver em formação continua aparecendo quando esse filtro não for usado.
 - O filtro de perfil completo considera perfil com dados obrigatórios, foto principal, ao menos uma descrição ou interesse e um objetivo informado. Objetivos são opcionais para salvar um perfil; esta exigência se aplica apenas ao filtro de completude.
-- “Passar” não registra exclusão e a pessoa pode retornar.
-- “Não tenho interesse” remove o perfil somente do Feed de quem escolheu essa ação. O usuário pode reverter a escolha na tela de preferências.
+- Navegar para outra pessoa não é uma ação de rejeição: não há botão “Passar”. O Feed combina apresentação de perfis com navegação vertical: deslizar para cima avança; para baixo revisita a sequência recente. No computador, ↑ e ↓ fazem a mesma navegação; botões acessíveis também estão disponíveis. As fotos do mesmo perfil são navegadas lateralmente.
+- “Não tenho interesse” oculta o perfil somente do Feed de quem escolheu a ação durante **7 dias**. Depois, ele volta a ser elegível, respeitando os demais filtros e exclusões. A preferência pode ser desfeita antes. Não impede contato, leitura do perfil/fotos ou avaliação e não afeta a reputação; não equivale a bloqueio.
+
+## Fotos do perfil
+
+- Decisão confirmada em 7 de outubro de 2026: até **6 fotos por perfil**, incluindo a principal obrigatória.
+- Cada envio aceita JPG, PNG ou WebP de até **3 MB**, processado para remover metadados.
+- O usuário escolhe a foto principal e pode remover as demais; para remover a principal, escolhe outra ou envia uma substituta.
+- As fotos complementares aparecem na ordem em que foram adicionadas. Reordenação manual das complementares e política de retenção física continuam pendentes.
+- O álbum segue a privacidade do perfil e os bloqueios bilaterais. Fotos removidas do álbum deixam de ser compartilhadas.
 
 ## Primeiro contato e conversa
 
-- O primeiro contato exige primeira impressão já enviada.
+- O remetente deve avaliar a primeira impressão antes de enviar o contato. O destinatário também deve avaliar o remetente antes de aceitar. **As duas primeiras impressões válidas são obrigatórias antes da conversa e da avaliação de interação**, além das cinco mensagens de cada participante.
 - Ele é exclusivamente texto, com 1 a 500 caracteres, sem links ativos, mídia ou anexos no MVP.
 - Há um único primeiro contato pendente por par de pessoas.
 - Ele expira depois de 30 dias sem resposta.
-- O destinatário pode aceitar ou recusar sem abrir o conteúdo. A aceitação cria uma conversa; a recusa não cria conversa.
+- O destinatário pode aceitar ou recusar sem abrir o conteúdo. A aceitação exige a primeira impressão e cria uma conversa; a recusa não exige avaliação e não cria conversa.
 - Depois de uma recusa, o remetente não pode iniciar novo primeiro contato para a mesma pessoa durante 30 dias.
 - A mensagem de primeiro contato pode ser editada ou excluída por até uma hora, enquanto ainda estiver pendente.
 - Conversas aceitas começam com texto. Fotos, vídeos, áudios, GIFs, respostas a mensagem e exclusão de mensagens são funcionalidades futuras de conversas.
@@ -98,3 +106,10 @@ A opção não pode ser alterada nem a avaliação pode ser apagada pelo autor n
 - monetização;
 - telefone e identidade verificados;
 - comentários livres em avaliações.
+
+## Continuidade e compatibilidade — 7 de outubro de 2026
+
+- Busca por nome em Primeiro contato e Conversas, aplicada no servidor antes do limite de 100 resultados por lista. Ordenação e paginação da lista completa permanecem pendentes; o histórico de mensagens tem paginação própria.
+- Atualizações da conversa preservam mensagens antigas carregadas e recebem novas mensagens por cursor, sem duplicatas.
+- Conversas e avaliações existentes não são apagadas nem recebem notas fabricadas. Se faltar primeira impressão válida de algum participante, a conversa aguarda esse pré-requisito para novas mensagens/avaliações de interação; leitura e encerramento permanecem disponíveis.
+- Preferências antigas de desinteresse não tinham data: a migração preserva cada uma durante sete dias a partir da aplicação. Novas escolhas contam sete dias a partir do clique.

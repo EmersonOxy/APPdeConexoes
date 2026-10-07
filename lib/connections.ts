@@ -4,7 +4,7 @@ export type Contact = { id: string; outgoing: boolean; name: string; peer_id: st
 export type Conversation = { id: string; name: string; peer_id: string; status: "active" | "closed"; created_at: string };
 export type Inbox = { contacts: Contact[]; conversations: Conversation[] };
 export type ChatMessage = { id: string; author: string; body: string; created_at: string };
-export type Chat = { status: "active" | "closed"; first_contact: string; first_author: string; messages: ChatMessage[] };
+export type Chat = { status: "active" | "closed"; first_contact: string; first_author: string; both_rated?: boolean; messages: ChatMessage[] };
 export type ConnectionAction = "list" | "profile" | "reputation" | "rate" | "send" | "contact" | "accept" | "decline" | "edit" | "withdraw" | "conversation" | "message" | "close" | "interaction" | "rate_interaction";
 
 export type InteractionStatus = { eligible: boolean; own_messages: number; peer_messages: number; next_at: string | null; previous: { photos: number; conversation: number; respect: number; humor: number; visibility: "private" | "name" | "profile" } | null };

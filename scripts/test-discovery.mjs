@@ -23,7 +23,8 @@ for (const filters of [{min_age:17},{max_age:121},{min_age:40,max_age:20},{inter
 await rpc('rate',bob,{score:4,visibility:'private'});
 const contact=(await rpc('send',bob,{body:'Contato'})).id;
 assert.deepEqual(await discovery({},[],bob),[]);
-await asUser(bob);const chat=(await rpc('accept',contact)).id;
+await asUser(bob);await rpc('rate',alice,{score:4,visibility:'name'});
+const chat=(await rpc('accept',contact)).id;
 await asUser(alice);assert.deepEqual(await discovery({},[],bob),[]);
 for(let i=0;i<5;i++) {
  await asUser(alice);await rpc('message',chat,{body:'Pergunta',request_id:randomUUID()});
@@ -37,7 +38,7 @@ assert.deepEqual(await discovery({min_score:5}),[]);
 assert.ok((await discovery()).some(p=>p.user_id===carol));
 profiles=await discovery();
 for(const p of profiles) { assert.equal(p.birth_date,undefined);assert.equal(p.email,undefined);assert.equal(p.overall,undefined); }
-await db.query('insert into public.duoeto_feed_hidden(owner_id,target_id) values($1,$2)',[alice,bob]);
+await db.query('select public.duoeto_hide_profile($1)',[bob]);
 assert.deepEqual(await discovery({},[],bob),[]);
 await db.query('delete from public.duoeto_feed_hidden where owner_id=$1',[alice]);
 await asUser(bob);await block(bob,alice);

@@ -528,3 +528,50 @@ button, summary { touch-action: manipulation; }
 .notification-list { list-style: none; padding: 0; display: grid; gap: 1rem; }
 .report-form { margin-top: 1rem; }
 .report-form summary { cursor: pointer; }
+
+/* Profile discovery and album */
+.discovery-heading { display: flex; align-items: baseline; gap: 1rem; margin: 0 0 1rem; }
+.discovery-heading h1 { font-size: 1.75rem; }
+.discovery-heading .eyebrow, .discovery-heading .muted { display: none; }
+.feed { max-width: 780px; margin: auto; grid-template-columns: minmax(0, 1fr); }
+.feed-settings { grid-row: 1; }
+.feed-settings > details { padding: .8rem 1rem; }
+.feed-settings summary, .discovery-card summary { cursor: pointer; font-weight: 600; min-height: 32px; }
+.feed-settings form { margin: 1rem 0; }
+.feed-settings fieldset { display: grid; gap: 1rem; border: 0; padding: 0; min-width: 0; }
+.feed-settings input[type=checkbox] { width: auto; }
+.discovery-visual, .gallery { position: relative; }
+.gallery { overflow: hidden; border-radius: 1rem; background: var(--blue-soft); }
+.gallery .feed-photo, .gallery .profile-cover { height: min(64dvh, 680px); min-height: 280px; width: 100%; max-height: none; object-fit: cover; }
+.discovery-card .gallery { border-radius: 0; }
+.discovery-caption { position: absolute; inset: auto 0 0; padding: 4rem 1.5rem 1.5rem; color: white; background: linear-gradient(transparent, rgba(15,25,43,.88)); pointer-events: none; }
+.discovery-caption h2 { font-size: clamp(2rem, 5vw, 3rem); overflow-wrap: anywhere; }
+.discovery-caption .eyebrow { color: white; font-size: .65rem; }
+.discovery-caption p { margin-bottom: .5rem; }
+.discovery-card .card-body { padding: .8rem 1.2rem; }
+.discovery-card details[open] > summary { margin-bottom: 1rem; }
+.gallery-dots { position: absolute; top: .65rem; left: 1rem; right: 1rem; display: flex; gap: .4rem; z-index: 1; }
+.gallery-dots button { flex: 1; height: 24px; padding: 0; border: 0; background: transparent; }
+.gallery-dots button::after { content: ""; display: block; height: 4px; border-radius: 4px; background: rgba(255,255,255,.5); box-shadow: 0 1px 4px #25324A; }
+.gallery-dots button[aria-pressed=true]::after { background: white; }
+.gallery-prev, .gallery-next { position: absolute; top: 45%; width: 44px; height: 48px; border: 1px solid rgba(255,255,255,.6); border-radius: 50%; background: rgba(25,35,50,.5); color: white; font-size: 2rem; }
+.gallery-prev { left: .7rem; } .gallery-next { right: .7rem; }
+.feed-actions { margin: .8rem 0; grid-template-columns: 1fr 1.3fr auto; }
+.album-editor, .album-preview { display: flex; flex-wrap: wrap; gap: 1rem; }
+.album-editor > div { padding: .7rem; border: 1px solid var(--line); border-radius: 1rem; }
+.album-editor input[type=radio], .album-editor input[type=checkbox] { width: auto; }
+.profile-form .album-editor label { display: flex; align-items: center; }
+.message-search { display: grid; gap: .5rem; margin: 1rem 0; max-width: 32rem; }
+.message-search input { font: inherit; padding: .8rem 1rem; border: 1px solid var(--line); border-radius: 1rem; }
+@media(max-width:600px) {
+  .header { flex-direction: row; align-items: center; padding: .3rem 0; gap: .5rem; }
+  .header .duoeto-brand { width: 70px; height: 62px; flex-shrink: 0; }
+  .header .brand-logo { width: 70px; height: 70px; transform: translateY(-4px); }
+  .navigation { width: auto; } .navigation a { padding: .55rem .5rem; font-size: .8rem; }
+  .discovery-page { padding-top: .25rem; } .discovery-heading { margin-bottom: .5rem; }
+  .gallery .feed-photo { height: 58dvh; }
+  .feed-actions { grid-template-columns: 1fr 1.3fr; } .feed-actions > :last-child { grid-column: 1 / -1; }
+}
+
+.notification-link { display: grid; place-items: center; min-width: 44px; min-height: 44px; border-radius: 50%; background: white; border: 1px solid var(--line); }
+.header .navigation { margin-left: auto; }

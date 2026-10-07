@@ -2,7 +2,22 @@
 
 Referências de produto: [Bíblia](BIBLIA_DO_PRODUTO.md) e [Decisões do MVP](DECISOES_MVP.md). As decisões posteriores prevalecem sobre propostas antigas. Este documento registra a implementação local e a aplicação validada no Supabase remoto. A implantação na Vercel não foi verificada por esta tarefa.
 
-## Implementação
+## Atualização final — Feed, álbum e primeira impressão bilateral
+
+- Feed com um perfil por vez, foto em destaque, informações progressivas, gestos verticais para pessoas, laterais para fotos e ↑/↓ no computador. Botão “Passar” removido. Retorno à aba revalida o perfil sem reiniciar os filtros e o histórico.
+- “Não tenho interesse” vale sete dias, só para o Feed de quem escolheu. Não impede foto, avaliação nem contato. Expiração consultada no banco, sem cron. Preferências legadas recebem sete dias a partir da migração por não terem data anterior.
+- Álbum de até seis fotos, principal obrigatória, escolha da principal e remoção das complementares. Uploads de até 3 MB são processados e enviados um por requisição, sem exceder o limite de corpo da hospedagem. Perfil público agora mostra fotos; Storage permanece privado.
+- Primeira impressão exigida do remetente antes do envio e do destinatário antes do aceite. Novas mensagens e avaliação de interação exigem ambas válidas. Conversas legadas são preservadas e exibem orientação se faltar avaliação, sem fabricar notas.
+- Busca por nome no banco em contatos e conversas, antes do limite de 100 resultados. Paginação do histórico usa cursores antes/depois; atualização não descarta mensagens antigas nem duplica resultados.
+- Navegação principal mantém Feed, Mensagens e Perfil; Notificações fica em controle secundário acessível. Manifesto usa as cores oficiais.
+
+A migração `20261007040000_duoeto_feed_gallery_prerequisites.sql` foi aplicada e registrada no Supabase `nblobpvjjuvvcxcfyeux`. Validação autenticada em transação revertida confirmou ocultação por sete dias, fotos/perfil acessíveis após ocultação e busca. Perfis, contatos, conversas e mensagens foram preservados (2 perfis, 1 contato, 1 conversa e 11 mensagens no momento da validação). Anônimos não executam a RPC do álbum e usuários não inserem diretamente prazos de ocultação.
+
+Passaram as oito suítes (`profiles`, `feed`, `connections`, `interactions`, `safety`, `discovery`, `feed-gallery`, `messages`), TypeScript e build de produção. A suíte original de Feed valida a migração histórica; as de conexões/discovery e a nova suíte validam a atualização completa. O servidor de produção local respondeu às páginas públicas, redirecionou páginas protegidas e negou fotos sem sessão com 404 e no-store.
+
+Chromium validou componentes reais em cópia isolada com ações e imagens simuladas: navegação por teclado, gestos verticais/laterais, troca de fotos, atalhos ignorados em formulários, ocultação e layout móvel/desktop sem overflow ou erros JavaScript. Isso não equivale a teste autenticado de upload no Storage nem a confirmação de implantação na Vercel.
+
+## Implementação anterior
 
 - Corrigidas duas referências `publilc.duoeto_profiles` na listagem de conexões. A migração de interação também repara a função instalada com o erro, preservando dados.
 - Avaliação de interação acessível em Mensagens: cinco mensagens de texto de cada participante na mesma conversa; o primeiro contato não conta. Quatro notas inteiras de 1 a 5, sem comentário livre. A primeira avaliação pode ocorrer em conversa ativa ou encerrada; o encerramento não reduz o intervalo de sete dias para reavaliação.
@@ -41,6 +56,8 @@ npm run test:connections
 npm run test:interactions
 npm run test:safety
 npm run test:discovery
+npm run test:feed-gallery
+npm run test:messages
 npm run typecheck
 npm run build
 npm run start -- --hostname 127.0.0.1
@@ -57,9 +74,9 @@ Sem configuração Supabase, `/`, `/entrar` e `/cadastro` devem responder 200. F
 ## Pendências que exigem decisões ou acesso externo
 
 - Aceitação das telas com duas contas confirmadas no navegador, upload real no Storage e verificação da publicação na Vercel. A configuração pública foi carregada localmente de arquivo ignorado; banco remoto e ciclo SQL autenticado já foram validados.
-- Limite de fotos e regras de remoção/reordenação/moderação para implementar álbum e navegação lateral; atualmente existe uma foto principal.
+- Reordenação manual de fotos complementares, política de retenção/limpeza de objetos antigos e moderação de imagens. O álbum de seis fotos, escolha da principal e remoção do álbum já estão implementados.
 - Opções de gênero e significado do filtro, consentimento e precisão da localização aproximada para distância. Não há filtro de distância ou coordenadas inventadas.
 - Critérios, limiares e redação dos badges automáticos e respectivo filtro. Interesses escolhidos já aparecem como chips.
 - Operação de moderação: pessoas responsáveis, painel, acesso administrativo, auditoria das decisões, punição, recurso, invalidação de avaliações, prazos e comunicação. Registro/status de denúncia estão implementados; uma fila não significa que exista equipe operacional.
 - Política de privacidade, consentimentos, retenção e exclusão de dados antes da abertura pública.
-- Busca e filtros de Mensagens continuam sem especificação final. Mídia, push/e-mail, identidade verificada, monetização e aplicativo nativo permanecem fora do primeiro corte.
+- Ordenação, paginação das listas de contatos/conversas e filtros adicionais de Mensagens continuam sem especificação final. A busca por nome já está implementada. Mídia, push/e-mail, identidade verificada, monetização e aplicativo nativo permanecem fora do primeiro corte.

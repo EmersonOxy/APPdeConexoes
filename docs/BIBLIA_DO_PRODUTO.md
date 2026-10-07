@@ -144,6 +144,8 @@ O produto terá um indicador de completude, atualizado quando informações e fo
 
 O perfil também mostra badges de interesse escolhidos pelo usuário e pode indicar se o perfil está completo.
 
+**Decidido em 7 de outubro de 2026.** O álbum permite até 6 fotos, incluindo a principal obrigatória, com até 3 MB por envio. O usuário pode trocar a principal e remover fotos complementares. A navegação entre fotos é lateral.
+
 ### 8.2 Badges
 
 **Decidido.** Há dois grupos de badges:
@@ -157,11 +159,12 @@ O perfil também mostra badges de interesse escolhidos pelo usuário e pode indi
 
 ### 9.1 Experiência de uso
 
-**Decidido.** O Feed tem navegação vertical inspirada em Reels/TikTok:
+**Decidido.** O Feed combina apresentação de perfis ao estilo Tinder com navegação vertical ao estilo TikTok, mostrando uma pessoa por vez:
 
 - fotos do mesmo perfil são navegáveis lateralmente;
 - deslizar para cima apresenta a próxima pessoa;
 - deslizar para baixo permite voltar na sequência recente;
+- no computador, as setas ↑ e ↓ navegam entre pessoas; avançar não registra rejeição nem exige avaliação;
 - as informações do perfil aparecem progressivamente;
 - o usuário pode avaliar, iniciar o primeiro contato ou executar ações sobre aquele perfil.
 
@@ -187,14 +190,14 @@ Também são propostas, ainda sujeitas à confirmação:
 
 | Ação | Regra atual | Status |
 | --- | --- | --- |
-| **Passar** | Apenas avança no Feed. A pessoa pode reaparecer futuramente. | Decidido |
-| **Não tenho interesse** | Remove aquela pessoa do Feed daquele usuário, sem bloquear, denunciar ou afetar a reputação da outra pessoa. | Decidido |
+| **Navegar para a próxima pessoa** | Deslize ou setas. Não existe botão “Passar”; não registra rejeição. | Decidido |
+| **Não tenho interesse** | Oculta aquela pessoa somente do Feed daquele usuário por 7 dias, sem bloquear contato, denunciar ou afetar a reputação. Após o prazo, volta a ser elegível. | Decidido |
 | **Avaliar** | Registra a primeira impressão e revela a reputação no Feed para quem avaliou. | Decidido |
 | **Enviar primeiro contato** | Só fica disponível após a avaliação de primeira impressão. | Decidido |
 | **Bloquear** | Impede contato entre as duas pessoas. | Decidido |
 | **Denunciar** | Encaminha o caso para moderação. | Decidido |
 
-**Em aberto.** Não foi definida a reversão de “Não tenho interesse”, a disponibilidade do perfil em busca depois dessa ação, nem o histórico de perfis que poderá ser revisitado.
+**Decidido no MVP.** A preferência pode ser restaurada antes do prazo e só afeta o Feed; perfil, fotos, contato e avaliações permanecem disponíveis. O histórico recente guarda até 50 perfis por visita e verifica novamente a elegibilidade. Histórico persistente e ilimitado fica para evolução futura.
 
 ## 10. Filtros
 
@@ -238,7 +241,7 @@ Há dois momentos de avaliação:
 | Momento | Componentes | Gatilho |
 | --- | --- | --- |
 | **Primeira impressão** | Nota de 1 a 5 estrelas. | Ao conhecer o perfil no Feed; é obrigatória antes do primeiro contato. |
-| **Interação** | Fotos, conversa, respeito e humor. | Desbloqueada quando cada participante tiver enviado ao menos cinco mensagens na conversa. |
+| **Interação** | Fotos, conversa, respeito e humor. | Exige primeiras impressões dos dois participantes e ao menos cinco mensagens de cada um na conversa. |
 
 ### 11.2 Regras de avaliação
 
@@ -320,7 +323,7 @@ Independentemente da escolha, a avaliação entra na reputação agregada.
 2. Ela pode enviar **uma única mensagem** de primeiro contato.
 3. Essa mensagem pode ser editada durante uma hora e excluída durante uma hora.
 4. O destinatário pode recusar sem abrir a mensagem.
-5. Se o destinatário responder, o primeiro contato é convertido em uma conversa.
+5. Para aceitar e iniciar a conversa, o destinatário também deve avaliar a primeira impressão do remetente. O aceite cria a conversa; ambas as avaliações devem existir antes da interação.
 
 Enquanto não houver resposta, o primeiro contato não é uma conversa e não autoriza novas mensagens naquele canal.
 
@@ -336,7 +339,7 @@ Enquanto não houver resposta, o primeiro contato não é uma conversa e não au
 
 ### 14.1 Conversa aceita
 
-**Decidido.** Uma resposta ao primeiro contato cria uma conversa entre as duas pessoas. Encerrar uma conversa é diferente de bloquear e denunciar: encerra aquela interação sem acusar automaticamente a outra pessoa de violação.
+**Decidido.** O aceite do primeiro contato cria uma conversa entre as duas pessoas, depois de ambas registrarem a primeira impressão. Encerrar uma conversa é diferente de bloquear e denunciar: encerra aquela interação sem acusar automaticamente a outra pessoa de violação.
 
 ### 14.2 Experiência prevista
 

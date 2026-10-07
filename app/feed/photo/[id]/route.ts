@@ -11,7 +11,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const supabase = await createServerSupabaseClient(false);
   const { data: identity, error: authError } = await supabase.auth.getUser();
   if (authError || !identity.user?.email_confirmed_at) return unavailable();
-  const { data: path, error } = await supabase.rpc("duoeto_feed_photo", { target: id });
+  const index = Number(new URL(_request.url).searchParams.get("index") ?? 0);
+  if (!Number.isInteger(index) || index < 0 || index > 5) return unavailable();
+  const { data: paths, error } = await supabase.rpc("duoeto_profile_photos", { target: id });
+  const path = paths?.[index];
   if (error || !path) return unavailable();
   const { data: photo, error: photoError } = await supabase.storage.from(photoBucket).download(path);
   if (photoError || !photo) return unavailable();

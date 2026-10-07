@@ -6,7 +6,7 @@ import { connectionAction } from "@/app/mensagens/actions";
 import { ReportForm } from "./report-form";
 import type { Reputation } from "@/lib/connections";
 
-export function ReputationPanel({ target, onSent, readOnly = false }: { target: string; onSent?: () => void; readOnly?: boolean }) {
+export function ReputationPanel({ target, onSent, allowContact = true, readOnly = false }: { target: string; onSent?: () => void; allowContact?: boolean; readOnly?: boolean }) {
   const [reputation, setReputation] = useState<Reputation | null>(null);
   const [score, setScore] = useState(0);
   const [visibility, setVisibility] = useState("private");
@@ -75,7 +75,7 @@ export function ReputationPanel({ target, onSent, readOnly = false }: { target: 
         <button className="button button-primary" disabled={!score || pending}>Publicar avaliação</button>
       </fieldset>
     </form> : null}
-    {!readOnly && reputation?.own_score && !sent ? <form className="form contact-form" onSubmit={event => { event.preventDefault(); send(); }}>
+    {!readOnly && allowContact && reputation?.own_score && !sent ? <form className="form contact-form" onSubmit={event => { event.preventDefault(); send(); }}>
       <label>Primeiro contato<textarea value={body} onChange={event => setBody(event.target.value)} maxLength={500} required placeholder="Apresente-se com respeito." /></label>
       <span className="field-help">{body.length}/500 · Uma mensagem até a outra pessoa aceitar. Expira em 30 dias.</span>
       <button className="button button-primary" disabled={pending || !body.trim()}>Enviar primeiro contato</button>

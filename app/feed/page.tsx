@@ -12,8 +12,8 @@ export default async function FeedPage() {
   const initial = profile ? await loadFeed() : null;
   return (
     <ApplicationShell>
-      <main className="page">
-        <section className="page-heading">
+      <main className="page discovery-page">
+        <section className="page-heading discovery-heading">
           <p className="eyebrow">Descoberta</p>
           <h1>Seu Feed</h1>
           <p className="muted">
