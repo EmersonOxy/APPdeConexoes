@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import {db,alice,bob,carol,unconfirmed,banned,incomplete,asUser,block} from './connections-fixture.mjs';
+import {approximateLocation} from '../lib/discovery-options.ts';
+import {parseFeedFilters,feedQuery} from '../lib/feed.ts';
+const location=async(action,latitude=null,longitude=null,consent=false)=>(await db.query('select public.duoeto_location($1,$2,$3,$4) r',[action,latitude,longitude,consent])).rows[0].r;
+const feed=async(filters={},selected=null)=>(await db.query('select * from public.duoeto_discovery($1,$2,$3)',[[],filters,selected])).rows;
+assert.deepEqual(approximateLocation(-23.563421,-46.655323),{latitude:-23.55,longitude:-46.65});
+for(const pair of [[NaN,0],[0,Infinity],[91,0],[0,-181]])assert.throws(()=>approximateLocation(...pair));
+const filters=parseFeedFilters({gender:'woman',max_distance:'30'});assert.equal(filters.max_distance,30);assert.equal(new URLSearchParams(feedQuery(filters)).get('gender'),'woman');
+await asUser(alice);assert.equal((await location('status')).enabled,false);
+await assert.rejects(location('save',-23.55,-46.65,false),/Autorize/);
+await assert.rejects(location('save',91,0,true),/Autorize/);
+await assert.rejects(location('save',0,181,true),/Autorize/);
+await assert.rejects(location('save',null,0,true),/Autorize/);
+await assert.rejects(feed({max_distance:30}),/Ative sua localização/);
+await assert.rejects(feed({max_distance:31}),/Confira/);await assert.rejects(feed({gender:'invalid'}),/Confira/);
+const status=await location('save',-23.563421,-46.655323,true);assert.equal(status.enabled,true);assert.equal(status.latitude,undefined);assert.equal(status.longitude,undefined);
+await assert.rejects(db.query('select * from duoeto_private.locations'),/permission denied/);
+await db.exec('reset role');const stored=(await db.query('select latitude,longitude from duoeto_private.locations where user_id=$1',[alice])).rows[0];assert.equal(Number(stored.latitude),-23.55);assert.equal(Number(stored.longitude),-46.65);
+await asUser(bob);await db.query("update public.duoeto_profiles set gender='woman' where user_id=$1",[bob]);await location('save',-23.6,-46.65,true);
+await assert.rejects(db.query("update public.duoeto_profiles set gender='invalid' where user_id=$1",[bob]),/check/);
+await asUser(carol);await db.query("update public.duoeto_profiles set gender='non_binary' where user_id=$1",[carol]);await location('save',-25.45,-49.25,true);
+await asUser(alice);assert.deepEqual((await feed({gender:'woman'})).map(p=>p.user_id),[bob]);assert.deepEqual((await feed({gender:'non_binary'})).map(p=>p.user_id),[carol]);
+assert.deepEqual((await feed({max_distance:10})).map(p=>p.user_id),[bob]);assert.equal((await feed({max_distance:10},carol)).length,0);assert.equal((await feed({gender:'woman'},carol)).length,0);
+assert.ok((await feed()).some(p=>p.user_id===carol));assert.ok((await feed()).every(p=>p.latitude===undefined&&p.longitude===undefined&&p.distance===undefined));
+await asUser(bob);await location('remove');assert.equal((await location('status')).enabled,false);await asUser(alice);assert.equal((await feed({max_distance:30})).length,0);assert.ok((await feed()).some(p=>p.user_id===bob));
+await asUser(bob);await location('save',-23.55,-46.65,true);await block(bob,alice);await asUser(alice);assert.equal((await feed({max_distance:30})).length,0);
+// Longitude wrap-around and poles do not produce NaN or enormous errors.
+await db.exec('reset role');const distance=async(a,b,c,d)=>(await db.query('select duoeto_private.distance_km($1,$2,$3,$4) d',[a,b,c,d])).rows[0].d;
+assert.ok(await distance(0,179.95,0,-179.95)<12);assert.ok(await distance(90,0,90,180)<0.001);
+await db.query('delete from auth.users where id=$1',[carol]);assert.equal((await db.query('select count(*)::int n from duoeto_private.locations where user_id=$1',[carol])).rows[0].n,0);
+for(const id of [unconfirmed,banned,incomplete,'']){await asUser(id);await assert.rejects(location('save',0,0,true),/Complete/);}
+await db.exec('reset role;set role anon');await assert.rejects(location('status'),/permission denied/);
+await db.close();console.log('PASS: gênero opcional, distância aproximada privada, consentimento, remoção, exclusão em cascata, filtros combinados, bloqueios, geografia e autorização.');

@@ -1,4 +1,5 @@
 "use client";
+import {genderOptions} from "@/lib/discovery-options";
 import Image from "next/image";
 import { ReputationPanel } from "./reputation";
 import { useActionState, useState } from "react";
@@ -75,6 +76,7 @@ export function ProfileEditor({ initialProfile, initialPhotoUrl, initialGalleryU
             <label>Cidade *<input name="city" autoComplete="address-level2" defaultValue={saved?.city} required minLength={2} maxLength={100} /></label>
             <label>Estado *<select name="state" autoComplete="address-level1" defaultValue={saved?.state ?? ""} required><option value="" disabled>Selecione</option>{stateOptions.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
           </div>
+          <label>Gênero (opcional)<select name="gender" defaultValue={saved?.gender??""}><option value="">Prefiro não informar</option>{Object.entries(genderOptions).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select><span className="field-help">Usado nas preferências de descoberta. Você pode alterar ou remover essa informação.</span></label>
           <label>Sobre mim (opcional)<textarea name="about" defaultValue={saved?.about} maxLength={500} /></label>
           <fieldset><legend>Interesses (opcional)</legend><div className="choice-grid">{interestOptions.map(value => <label key={value}><input type="checkbox" name="interests" value={value} defaultChecked={saved?.interests.includes(value)} />{value}</label>)}</div></fieldset>
           <fieldset><legend>O que procuro (opcional)</legend><div className="choice-grid">{objectiveOptions.map(value => <label key={value}><input type="checkbox" name="objectives" value={value} defaultChecked={saved?.objectives.includes(value)} />{value}</label>)}</div></fieldset>

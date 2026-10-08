@@ -11,7 +11,7 @@ export default async function ProfilePage() {
   const user = await requireUser();
   const supabase = await createServerSupabaseClient(false);
   const { data, error } = await supabase.from("duoeto_profiles")
-    .select("display_name,birth_date,city,state,about,interests,objectives,photo_path,gallery_paths")
+    .select("display_name,birth_date,city,state,gender,about,interests,objectives,photo_path,gallery_paths")
     .eq("user_id", user.id).maybeSingle();
   const profile = data as Profile | null;
   const photo = profile?.photo_path ? await supabase.storage.from(photoBucket).createSignedUrl(profile.photo_path, 3600) : null;

@@ -18,7 +18,7 @@ MVP web para descobrir pessoas, avaliar a primeira impressão, iniciar um primei
 1. Instale as dependências com npm ci.
 2. Copie .env.example para .env.local.
 3. Preencha as variáveis públicas do Supabase e NEXT_PUBLIC_SITE_URL.
-4. Execute npm run test:profiles, npm run test:feed, npm run test:connections, npm run test:interactions, npm run test:safety, npm run test:discovery, npm run test:feed-gallery, npm run test:messages, npm run test:accounts, npm run test:notifications, npm run typecheck e npm run build.
+4. Execute npm run test:profiles, npm run test:feed, npm run test:connections, npm run test:interactions, npm run test:safety, npm run test:discovery, npm run test:feed-gallery, npm run test:messages, npm run test:accounts, npm run test:notifications, npm run test:gender-distance, npm run typecheck e npm run build.
 5. Inicie a aplicação com npm run dev.
 
 O SQL em supabase/drafts é um rascunho para revisão e não deve ser aplicado. Login, confirmação de e-mail, edição e foto do próprio perfil estão implementados. O Feed usa perfis reais após a migração descrita em docs/FEED_DUOETO.md. Primeiras impressões, contatos, conversas e avaliações de interação estão ligados às RPCs do banco. As novas migrações incluem denúncias, notificações e filtros; confira a ordem e as limitações em docs/CONTINUIDADE_MVP.md antes da aplicação remota.

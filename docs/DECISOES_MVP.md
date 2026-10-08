@@ -51,7 +51,7 @@ A opção não pode ser alterada nem a avaliação pode ser apagada pelo autor n
 - A ordem exclui bloqueios, pessoas marcadas como “Não tenho interesse”, conversas ativas e primeiros contatos pendentes.
 - Uma pessoa não aparece duas vezes em sequência. Após terminar uma rodada, ela só pode voltar depois de outros perfis elegíveis.
 - Um perfil já avaliado pode reaparecer com o indicador “Avaliado” e a nota já dada, mas não permite nova primeira impressão.
-- O padrão inicial é: 18–50 anos, até 30 km, qualquer gênero, todos os objetivos e sem reputação mínima.
+- O padrão inicial é: 18–50 anos, todos os gêneros, todos os objetivos, sem limite de distância e sem reputação mínima. Distância é opcional e exige localização autorizada; não simular um limite de 30 km sem localização.
 - “Ainda pensando” é uma opção de objetivo do perfil, não um filtro padrão obrigatório.
 - O filtro de reputação mínima só inclui perfis que já tenham Nota geral. Quem estiver em formação continua aparecendo quando esse filtro não for usado.
 - O filtro de perfil completo considera perfil com dados obrigatórios, foto principal, ao menos uma descrição ou interesse e um objetivo informado. Objetivos são opcionais para salvar um perfil; esta exigência se aplica apenas ao filtro de completude.
@@ -135,3 +135,13 @@ A opção não pode ser alterada nem a avaliação pode ser apagada pelo autor n
 
 - Manter temporariamente o envio padrão limitado de e-mail do Supabase. Configuração de SMTP próprio adiada pelo responsável; confirmação por link continua obrigatória.
 - Notificações oferecem histórico paginado, total global de não lidas e acesso ao item correspondente. Destinos verificam novamente autorização e bloqueios; abrir um contato não revela automaticamente seu conteúdo.
+
+## Gênero e distância — implementação autorizada em 8 de outubro de 2026
+
+- Gênero opcional no perfil: Mulher, Homem, Pessoa não binária, Outra identidade ou Prefiro não informar (sem valor salvo). Não é requisito de completude, não é inferido e pode ser removido/alterado.
+- O filtro seleciona o gênero declarado da pessoa a conhecer: Todos (padrão), uma das quatro identidades ou Não informado. Não presume orientação sexual ou interesse recíproco.
+- Distância máxima aproximada: 10, 30, 50, 100 ou 200 km. Padrão sem limite. Somente quem salvou sua localização aproximada pode ativar um raio; perfis sem localização continuam no Feed sem esse filtro.
+- Autorização explícita antes de pedir a posição ao navegador. O navegador reduz a precisão para uma grade de 0,05 grau antes do envio; o banco repete a redução. Coordenadas aproximadas ficam em tabela privada, sem acesso direto dos usuários; só o próprio status/data de atualização é retornado. Não mostrar coordenadas ou quilômetros individuais por pessoa.
+- Cálculo em linha reta entre regiões aproximadas, com margem de alguns quilômetros; não equivale a rota de viagem nem posição atual. A grade tem até cerca de 5,6 km por lado. Cidade/estado não são convertidos em coordenadas inventadas.
+- Sem acompanhamento em segundo plano. Atualização manual autorizada; posição muito imprecisa (erro informado pelo navegador acima de 10 km) não é aceita. Falha/recusa de permissão mantém o Feed disponível sem raio.
+- Remover localização apaga a região salva imediatamente, desativa o seletor de distância e retira a pessoa de buscas com raio. Não apaga cidade/estado; exclusão de conta remove a localização em cascata. A localização permanece até atualização, remoção ou exclusão; não se conserva histórico de posições.

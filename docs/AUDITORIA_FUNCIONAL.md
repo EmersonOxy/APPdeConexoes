@@ -12,7 +12,7 @@ Comparação completa das seções 1–20 de `BIBLIA_DO_PRODUTO.md` com as decis
 | 7–8: álbum e perfil público | Seis fotos, principal obrigatória, troca/remoção, navegação lateral, prévia do perfil salvo, reputação e interesses. | `profile-editor`, `profile-gallery`, `/pessoa/[id]`. Prévia ainda usa apresentação própria, não reprodução integral do Feed. Reordenação manual foi adiada nas decisões posteriores; moderação/limpeza de arquivos precisam de regras. |
 | 8: badges | Interesses escolhidos disponíveis; reconhecimentos automáticos ainda não implementados. | Faltam limiares, textos e limites definidos. Não inventar critérios nem badges negativos. |
 | 9: Feed | Um perfil por vez, gestos/setas, histórico recente, notas ocultas até avaliar, desinteresse unilateral por 7 dias e restauração. | `feed`, `profile-gallery`, testes `feed-gallery`. Badge “Novo” segue proposta, não requisito fechado. |
-| 10: filtros | Idade, interesses, objetivos, reputação e completude; tela separada com aplicar/cancelar/padrão. | `/feed/filtros` e SQL de descoberta. Gênero, distância e badges dependem das definições listadas abaixo. |
+| 10: filtros | Idade, interesses, objetivos, reputação e completude; tela separada com aplicar/cancelar/padrão. | `/feed/filtros` e SQL de descoberta. Gênero e distância foram implementados na atualização de 8 de outubro abaixo. Badges dependem de critérios. |
 | 11–12: reputação e privacidade | Primeira impressão única; quatro notas de interação; cinco mensagens por pessoa; reavaliação após sete dias; médias, contagens e três visibilidades. | Testes `interactions`, projeções privadas. Lista pública mostra as avaliações recentes; paginação dessa lista ainda pode evoluir. Auditoria técnica existe, mas operação de moderação não está pronta. |
 | 13: primeiro contato | Texto único, avaliação prévia, aceite bilateral, recusa, edição/exclusão em uma hora, expiração em 30 dias e intervalo após recusa. | `ContactCard` e RPC. Nova tela abre diretamente contatos vindos de notificações, sem expor o texto antes de “Ler mensagem”. |
 | 14: conversas | Texto, histórico incremental, paginação, busca por nome/usuário, não lidas, encerramento, perfil, bloqueio e denúncia. | `messages`, testes `messages` e `accounts`. Link direto abre conversa antiga mesmo fora da primeira página. Ordem por criação permanece a decisão atual. Mídia/respostas/exclusão de mensagens são futuras. |
@@ -30,8 +30,8 @@ Comparação completa das seções 1–20 de `BIBLIA_DO_PRODUTO.md` com as decis
 
 ## Próximas decisões de produto
 
-- **Gênero:** quais opções o perfil oferece e o que exatamente o filtro seleciona.
-- **Distância:** fonte da localização aproximada, consentimento, precisão, atualização e comportamento sem localização. Cidade/estado não são coordenadas; não simular quilômetros.
+- **Gênero:** resolvido na atualização de 8 de outubro; campo opcional e filtro pelo gênero declarado.
+- **Distância:** resolvida na atualização de 8 de outubro; posição aproximada autorizada, atualização manual, remoção e Feed sem localização disponíveis.
 - **Badges positivos:** métricas, mínimo de avaliações, limiares e textos.
 - **Moderação:** responsáveis e permissões, fila/prazos, sanções, recurso, comunicação e invalidação de avaliações; só então implementar o painel operacional.
 - **Privacidade/retensão:** texto e responsável pela política, consentimentos, retenção de arquivos não usados e dados de auditoria. A exclusão definitiva solicitada já existe.
@@ -48,3 +48,7 @@ O responsável decidiu manter por ora o serviço padrão limitado do Supabase. N
 - Chromium com duas contas temporárias: notificação → contato sem abrir texto → leitura → aceite → conversa; 106 avisos carregados em quatro páginas; aviso de mensagem → conversa correta; links negados sem login e após bloqueio.
 - Perfis, fotos e contas temporárias removidos pelo fluxo de exclusão. O envio de e-mails não foi usado nesses testes, preservando a cota limitada.
 - Realtime continua com consulta periódica de recuperação. Nesta nuvem, o navegador usa essa recuperação por não confiar no certificado intermediário do acesso direto ao Supabase; a verificação TLS não foi desativada.
+
+## Atualização — 8 de outubro de 2026
+
+Gênero e distância concluídos conforme autorização para prosseguir. Migração `20261008010000_duoeto_gender_distance.sql`: campo opcional no perfil, localização aproximada privada e extensão dos filtros existentes, incluindo revalidação do histórico do Feed. Consulte as regras completas em `DECISOES_MVP.md`. Nova suíte `npm run test:gender-distance` cobre privacidade, consentimento, combinações de filtros, remoção, cascata, bloqueios, contas inelegíveis e cálculo próximo aos polos/antimeridiano. A interface nunca envia as coordenadas exatas obtidas do aparelho.

@@ -1,6 +1,7 @@
 "use server";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import {genderOptions,distanceOptions} from "@/lib/discovery-options";
 import { interestOptions, objectiveOptions } from "@/lib/profile";
 import { defaultFeedFilters, type FeedFilters, type FeedResult } from "@/lib/feed";
 
@@ -9,6 +10,8 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export async function loadFeed(seen: string[] = [], filters: FeedFilters = defaultFeedFilters, selected: string | null = null): Promise<FeedResult> {
   if (!filters || !Number.isInteger(filters.min_age) || !Number.isInteger(filters.max_age) || filters.min_age < 18 || filters.max_age > 120 || filters.min_age > filters.max_age || typeof filters.complete !== "boolean"
     || (filters.min_score !== undefined && (!Number.isFinite(filters.min_score) || filters.min_score < 1 || filters.min_score > 5))
+    || (filters.gender!==undefined && filters.gender!=='undisclosed' && !Object.hasOwn(genderOptions,filters.gender))
+    || (filters.max_distance!==undefined && !distanceOptions.includes(filters.max_distance))
     || (filters.interest !== undefined && !interestOptions.includes(filters.interest)) || (filters.objective !== undefined && !objectiveOptions.includes(filters.objective)) || (selected !== null && !uuid.test(selected))) {
     return { profiles: [], error: "Confira os filtros do Feed." };
   }
@@ -19,7 +22,7 @@ export async function loadFeed(seen: string[] = [], filters: FeedFilters = defau
   const { data: identity, error: authError } = await supabase.auth.getUser();
   if (authError || !identity.user?.email_confirmed_at) return { profiles: [], error: "Entre com sua conta confirmada para acessar o Feed." };
   const { data, error } = await supabase.rpc("duoeto_discovery", { seen, filters, selected });
-  if (error) return { profiles: [], error: "Não foi possível carregar os perfis. Tente novamente." };
+  if (error) return { profiles: [], error: error.code==="P0001"?error.message:"Não foi possível carregar os perfis. Tente novamente." };
   return { profiles: data ?? [] };
 }
 

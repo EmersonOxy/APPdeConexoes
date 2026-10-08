@@ -1,3 +1,9 @@
+# Atualização — gênero e distância, 8 de outubro de 2026
+
+Implementação autorizada pelo responsável: gênero opcional no perfil, filtro por gênero e distância máxima aproximada de 10/30/50/100/200 km. Padrão sem raio; localização depende de consentimento e permissão do navegador. Precisão reduzida antes do envio e novamente no banco; armazenamento privado sem coordenadas na projeção do Feed. Atualização manual e remoção disponíveis nos filtros. Contas existentes não recebem gênero ou localização inventados.
+
+Migração `20261008010000_duoeto_gender_distance.sql` aplicada no Supabase com registro no histórico; teste adicional `npm run test:gender-distance`. Regras em [Decisões do MVP](DECISOES_MVP.md). Gênero/distância deixam a lista de decisões pendentes; badges e operação de moderação continuam pendentes. SMTP limitado permanece como combinado.
+
 # Estado atual — revisão completa da Bíblia
 
 Consulte [Auditoria funcional](AUDITORIA_FUNCIONAL.md) para a comparação de todas as seções com o código e a lista consolidada de decisões restantes.
@@ -112,3 +118,5 @@ Sem configuração Supabase, `/`, `/entrar` e `/cadastro` devem responder 200. F
 - Operação de moderação: pessoas responsáveis, painel, acesso administrativo, auditoria das decisões, punição, recurso, invalidação de avaliações, prazos e comunicação. Registro/status de denúncia estão implementados; uma fila não significa que exista equipe operacional.
 - Política de privacidade, consentimentos e retenção operacional antes da abertura pública. A exclusão definitiva da conta e dados associados foi aprovada e implementada.
 - Ordenação por última atividade e filtros adicionais de Mensagens ainda podem evoluir. Paginação por criação/ID, busca por nome e filtro de não lidas estão implementados. Mídia, push/e-mail, identidade verificada, monetização e aplicativo nativo permanecem fora do primeiro corte.
+
+Validação da atualização de gênero/distância: onze suítes, TypeScript e build passaram. Chromium com duas contas temporárias e localização simulada validou persistência do gênero, consentimento, redução de precisão antes do envio, combinação real dos filtros e remoção. As contas, fotos e localizações temporárias foram removidas. Nenhum e-mail foi enviado pelos testes.

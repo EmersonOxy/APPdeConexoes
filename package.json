@@ -16,7 +16,8 @@
     "test:feed-gallery": "node scripts/test-feed-gallery.mjs",
     "test:messages": "node scripts/test-message-history.mjs",
     "test:accounts": "node scripts/test-accounts-inbox.mjs && node scripts/test-username-edge.mjs",
-    "test:notifications": "node scripts/test-notification-navigation.mjs"
+    "test:notifications": "node scripts/test-notification-navigation.mjs",
+    "test:gender-distance": "node scripts/test-gender-distance.mjs"
   },
   "engines": {
     "node": ">=22.0.0"

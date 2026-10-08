@@ -1,9 +1,10 @@
+import {genderOptions,type Gender} from "./discovery-options.ts";
 export const interestOptions = ["Jogos", "Filmes", "Música", "Academia", "Corrida", "Cozinhar", "Viajar", "Livros", "Gatos", "Cachorros", "Arte"];
 export const objectiveOptions = ["Namoro", "Amizade", "Outras conexões", "Ainda pensando"];
 export const stateOptions = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"];
 export const photoBucket = "duoeto-profile-photos";
 export type Profile = {
-  display_name: string; birth_date: string; city: string; state: string;
+  gender?: Gender | null; display_name: string; birth_date: string; city: string; state: string;
   about: string; interests: string[]; objectives: string[]; photo_path: string; gallery_paths?: string[];
 };
 export type ProfileState = { message: string; success: boolean; profile?: Profile; photoUrl?: string; galleryUrls?: string[] };
@@ -16,11 +17,13 @@ export function ageFromBirthDate(value: string, today = new Date()): number {
 export function readProfile(form: FormData): Omit<Profile, "photo_path" | "gallery_paths"> {
   const text = (name: string) => String(form.get(name) ?? "").trim();
   const profile = {
+    gender: (text("gender") || null) as Gender | null,
     display_name: text("display_name"), birth_date: text("birth_date"),
     city: text("city"), state: text("state"), about: text("about"),
     interests: [...new Set(form.getAll("interests").map(String))],
     objectives: [...new Set(form.getAll("objectives").map(String))],
   };
+  if (profile.gender && !Object.hasOwn(genderOptions,profile.gender)) throw new Error("Selecione uma opção de gênero disponível.");
   const date = new Date(profile.birth_date + "T00:00:00Z");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(profile.birth_date) || !Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== profile.birth_date) throw new Error("Informe uma data de nascimento válida.");
   const age = ageFromBirthDate(profile.birth_date);

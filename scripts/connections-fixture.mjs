@@ -69,3 +69,5 @@ await db.exec(await readFile(new URL("../supabase/migrations/20261007051000_duoe
 
 await db.exec(await readFile(new URL("../supabase/migrations/20261007052000_duoeto_inbox_username_search.sql", import.meta.url), "utf8"));
 await db.exec(await readFile(new URL("../supabase/migrations/20261007053000_duoeto_notification_navigation.sql", import.meta.url), "utf8"));
+
+await db.exec(await readFile(new URL("../supabase/migrations/20261008010000_duoeto_gender_distance.sql", import.meta.url), "utf8"));

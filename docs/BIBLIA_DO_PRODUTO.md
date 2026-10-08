@@ -460,3 +460,7 @@ Se a resposta à terceira pergunta for “precisa ser decidida”, ela não deve
 Conforme confirmação do responsável, a etapa atual prioriza funcionalidades; o acabamento visual fica para depois. Acesso persistente com entrada direta no Feed, login por usuário/e-mail, reenvio de confirmação por link, recuperação/troca de senha, desbloqueio e paginação são requisitos atuais. A exclusão de conta é definitiva, incluindo conversas e avaliações associadas, com confirmação explícita na interface. Os detalhes e limites operacionais estão em [Decisões do MVP](DECISOES_MVP.md) e [Autenticação](AUTENTICACAO.md).
 
 A busca nas conversas e primeiros contatos aceita também nome de usuário, com ou sem `@`. Os e-mails atuais confirmam por link; código numérico depende de modelo personalizado e não é solicitado na interface.
+
+## Atualização — gênero e distância, 8 de outubro de 2026
+
+Implementação autorizada pelo responsável: gênero opcional no perfil e filtro pelo gênero declarado; distância máxima aproximada opcional, com autorização antes de solicitar localização. Sem localização ou sem raio, o Feed continua disponível. Coordenadas exatas não são enviadas pelo aplicativo e posições aproximadas não são expostas a outros usuários. Atualização manual e remoção disponíveis. As opções, precisão, retenção e regras atuais estão em `DECISOES_MVP.md`; estas regras substituem as perguntas históricas de gênero/distância ainda abertas acima. Badges e moderação operacional continuam pendentes.
